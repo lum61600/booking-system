@@ -1,0 +1,339 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>毛孩預約 | 店家後台</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Noto+Serif+TC:wght@600;700;900&family=Noto+Sans+TC:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --cream:#F6F1E7; --pine:#26433A; --sage:#8FB09C; --sage-light:#D9E6DC;
+    --apricot:#E4943D; --apricot-dark:#C97A28; --ink:#26241F; --ink-soft:#5B5647;
+    --line:#DDD2BC; --white:#FFFDF9; --danger:#C15B4A; --danger-light:#F6E4DF; --radius:18px;
+  }
+  *{box-sizing:border-box;}
+  html,body{margin:0;padding:0;}
+  body{
+    background:var(--cream);
+    background-image:radial-gradient(circle at 8% 12%, rgba(143,176,156,0.18) 0, transparent 40%), radial-gradient(circle at 92% 85%, rgba(228,148,61,0.12) 0, transparent 45%);
+    color:var(--ink); font-family:"Noto Sans TC", sans-serif; min-height:100vh; padding:32px 16px 60px; -webkit-font-smoothing:antialiased;
+  }
+  .wrap{max-width:640px;margin:0 auto;}
+  .brand{display:flex;align-items:center;justify-content:space-between;margin-bottom:22px;}
+  .brand-left{display:flex;align-items:center;gap:12px;}
+  .brand-mark{width:46px;height:46px;border-radius:14px;background:var(--pine);display:flex;align-items:center;justify-content:center;flex-shrink:0;box-shadow:0 4px 10px rgba(38,67,58,0.25);}
+  .brand-name{font-family:"Noto Serif TC", serif;font-weight:900;font-size:22px;color:var(--pine);letter-spacing:0.5px;line-height:1.1;}
+  .brand-sub{font-size:12.5px;color:var(--ink-soft);letter-spacing:1px;margin-top:2px;}
+  .status-pill{font-size:11px;font-weight:700;padding:4px 10px;border-radius:99px;background:var(--sage-light);color:var(--pine);white-space:nowrap;}
+  .status-pill.err{background:var(--danger-light);color:var(--danger);}
+  .status-pill.saving{background:#FFF1DC;color:var(--apricot-dark);}
+
+  .card{background:var(--white);border-radius:var(--radius);border:1px solid var(--line);box-shadow:0 10px 30px rgba(38,67,58,0.08);padding:26px 22px 24px;}
+  .card-title{font-family:"Noto Serif TC", serif;font-weight:700;font-size:20px;color:var(--pine);margin:0 0 4px;}
+  .card-desc{font-size:13px;color:var(--ink-soft);margin:0 0 16px;line-height:1.6;}
+  .admin-note{background:#FFF6EA;border:1px solid #F0D6AF;color:var(--apricot-dark);font-size:12px;border-radius:10px;padding:10px 12px;margin-bottom:18px;line-height:1.6;}
+
+  .cal-head{display:flex;align-items:center;justify-content:space-between;margin-bottom:12px;}
+  .cal-head .mo{font-family:"Noto Serif TC",serif;font-weight:700;font-size:16px;color:var(--pine);}
+  .cal-nav button{height:30px;border-radius:8px;border:1.5px solid var(--line);background:var(--cream);cursor:pointer;font-size:12.5px;color:var(--pine);padding:0 10px;font-family:inherit;font-weight:600;}
+  .cal-grid{display:grid;grid-template-columns:repeat(7,1fr);gap:6px;margin-bottom:8px;}
+  .cal-dow{text-align:center;font-size:11px;color:var(--ink-soft);font-weight:700;padding-bottom:4px;}
+  .cal-cell{
+    aspect-ratio:1/1;display:flex;flex-direction:column;align-items:center;justify-content:center;
+    border-radius:10px;font-size:13.5px;font-weight:600;cursor:pointer;border:1.5px solid transparent;
+    color:var(--ink);background:var(--cream);gap:1px;position:relative;
+  }
+  .cal-cell.empty{visibility:hidden;cursor:default;}
+  .cal-cell.avail:hover{border-color:var(--sage);}
+  .cal-cell.selected{background:var(--apricot);color:#fff;}
+  .cal-cell.today{box-shadow:inset 0 0 0 1.5px var(--pine);}
+  .cal-cell.admin-closed{background:var(--danger-light);color:var(--danger);}
+  .cal-cell.admin-past{color:#C9C0AC;background:#F1ECE0;cursor:not-allowed;}
+  .cal-cell.extended{background:#FFF1DC;box-shadow:inset 0 0 0 1.5px var(--apricot);color:var(--apricot-dark);}
+  .cal-tag{font-size:8.5px;font-weight:700;line-height:1;background:var(--pine);color:#fff;padding:1.5px 4px;border-radius:5px;letter-spacing:0.5px;}
+  .cal-cell.selected .cal-tag{background:#fff;color:var(--pine);}
+  .cal-legend{display:flex;gap:16px;font-size:11.5px;color:var(--ink-soft);margin:6px 0 18px;flex-wrap:wrap;}
+  .cal-legend span{display:inline-flex;align-items:center;gap:5px;}
+  .dot{width:9px;height:9px;border-radius:50%;display:inline-block;}
+  .dot.a{background:var(--cream);border:1.5px solid var(--sage);}
+  .dot.d{background:#F1ECE0;border:1.5px solid #C9C0AC;}
+  .dot.c{background:var(--danger-light);border:1.5px solid var(--danger);}
+  .dot.e{background:#FFF1DC;border:1.5px solid var(--apricot);}
+
+  .toggle-row{display:flex;align-items:center;justify-content:space-between;background:var(--cream);border-radius:12px;padding:12px 14px;margin-bottom:16px;}
+  .toggle-row .label{font-size:13.5px;font-weight:700;color:var(--pine);}
+  .toggle-row .sub{font-size:11.5px;color:var(--ink-soft);margin-top:2px;}
+  .switch{position:relative;width:44px;height:25px;flex-shrink:0;}
+  .switch input{opacity:0;width:0;height:0;position:absolute;}
+  .switch .track{position:absolute;inset:0;background:var(--line);border-radius:99px;cursor:pointer;transition:.2s;}
+  .switch .track::before{content:"";position:absolute;width:19px;height:19px;left:3px;top:3px;background:#fff;border-radius:50%;transition:.2s;box-shadow:0 1px 3px rgba(0,0,0,.2);}
+  .switch input:checked + .track{background:var(--danger);}
+  .switch input:checked + .track::before{transform:translateX(19px);}
+
+  .slot-title{font-size:13px;font-weight:700;color:var(--pine);margin:4px 0 10px;}
+  .admin-slot-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin-bottom:8px;}
+  .admin-slot{padding:9px 4px;border-radius:9px;border:1.5px solid var(--line);background:var(--cream);text-align:center;font-size:12.5px;font-weight:600;color:var(--pine);cursor:pointer;}
+  .admin-slot.blocked{background:var(--danger-light);border-color:var(--danger);color:var(--danger);text-decoration:line-through;}
+  .empty-note{font-size:13px;color:var(--ink-soft);background:var(--cream);border-radius:10px;padding:14px;text-align:${'left'};}
+
+  .summary-box{background:var(--cream);border-radius:12px;padding:14px;margin-top:18px;}
+  .summary-box h5{margin:0 0 8px;font-size:12px;color:var(--pine);letter-spacing:.5px;}
+  .summary-item{display:flex;justify-content:space-between;align-items:center;font-size:12.5px;padding:6px 0;border-bottom:1px dashed var(--line);}
+  .summary-item:last-child{border-bottom:none;}
+  .summary-item .x{color:var(--danger);cursor:pointer;font-weight:700;font-size:13px;background:none;border:none;padding:2px 6px;}
+  .summary-empty{font-size:12px;color:var(--ink-soft);padding:6px 0;}
+
+  @media (max-width:420px){
+    .admin-slot-grid{grid-template-columns:repeat(2,1fr);}
+    .brand{flex-direction:column;align-items:flex-start;gap:8px;}
+  }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <div class="brand">
+    <div class="brand-left">
+      <div class="brand-mark">
+        <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
+          <circle cx="7" cy="8" r="2" fill="#F6F1E7"/><circle cx="12" cy="6" r="2" fill="#F6F1E7"/><circle cx="17" cy="8" r="2" fill="#F6F1E7"/>
+          <path d="M12 11c-3 0-5.5 2.2-5.5 4.6 0 1.6 1.3 2.4 2.7 1.9.9-.3 1.7-.5 2.8-.5s1.9.2 2.8.5c1.4.5 2.7-.3 2.7-1.9C17.5 13.2 15 11 12 11z" fill="#F6F1E7"/>
+        </svg>
+      </div>
+      <div>
+        <div class="brand-name">毛孩預約・店家後台</div>
+        <div class="brand-sub">管理可預約日期與時段</div>
+      </div>
+    </div>
+    <span class="status-pill" id="statusPill">尚未連線</span>
+  </div>
+
+  <div class="card" id="card"></div>
+</div>
+
+<script>
+/* 部署 Apps Script 後，把「網頁應用程式」網址貼在下面雙引號中，
+   此網址同時用來讀取／儲存後台設定（與客人端 index.html 共用同一個網址）*/
+const GOOGLE_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbwfwpOEL4l_iqzXx0Ky9_J2l-HzFsHZD-nURQ8VRpGPrs_NYAN6u5RTtVE607RutPH6/exec";
+
+const adminConfig = { closedDates:new Set(), blockedSlots:{}, extendedDates:new Set(), taichungDates:new Set() };
+const adminView = { year:new Date().getFullYear(), month:new Date().getMonth(), selectedDate:null };
+const BUSINESS_START = 9*60, DEFAULT_BUSINESS_END = 13*60, EXTENDED_BUSINESS_END = 20*60;
+
+function fmtDate(d){ return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0'); }
+function fmtTime(mins){ const h=Math.floor(mins/60), m=mins%60; return String(h).padStart(2,'0')+':'+String(m).padStart(2,'0'); }
+function isPastDate(dt){ const today=new Date(); today.setHours(0,0,0,0); return dt < today; }
+function isDateFullyClosed(dateStr){ return adminConfig.closedDates.has(dateStr); }
+function getBusinessEnd(dateStr){ return adminConfig.extendedDates.has(dateStr) ? EXTENDED_BUSINESS_END : DEFAULT_BUSINESS_END; }
+function baseSlots(endMin){ endMin = endMin || DEFAULT_BUSINESS_END; const arr=[]; for(let t=BUSINESS_START;t<endMin;t+=30) arr.push(t); return arr; }
+
+function setStatus(mode){
+  const pill = document.getElementById('statusPill');
+  if(!GOOGLE_SCRIPT_URL){ pill.textContent = '本機示範模式（尚未連結試算表）'; pill.className='status-pill err'; return; }
+  if(mode==='saving'){ pill.textContent = '儲存中...'; pill.className='status-pill saving'; }
+  else if(mode==='saved'){ pill.textContent = '已同步至試算表'; pill.className='status-pill'; }
+  else if(mode==='error'){ pill.textContent = '同步失敗'; pill.className='status-pill err'; }
+  else if(mode==='loading'){ pill.textContent = '讀取設定中...'; pill.className='status-pill saving'; }
+}
+
+async function loadSettings(){
+  if(!GOOGLE_SCRIPT_URL){ setStatus(); render(); return; }
+  setStatus('loading');
+  try{
+    const res = await fetch(GOOGLE_SCRIPT_URL + '?action=getSettings');
+    const data = await res.json();
+    if(data.success && data.settings){
+      adminConfig.closedDates = new Set(data.settings.closedDates || []);
+      adminConfig.extendedDates = new Set(data.settings.extendedDates || []);
+      adminConfig.taichungDates = new Set(data.settings.taichungDates || []);
+      const bs = {};
+      Object.entries(data.settings.blockedSlots || {}).forEach(([d,arr])=>{ bs[d] = new Set(arr); });
+      adminConfig.blockedSlots = bs;
+    }
+    setStatus('saved');
+  }catch(err){ console.error('讀取設定失敗：', err); setStatus('error'); }
+  render();
+}
+
+async function saveSettings(){
+  if(!GOOGLE_SCRIPT_URL) return;
+  setStatus('saving');
+  const settings = {
+    closedDates: Array.from(adminConfig.closedDates),
+    extendedDates: Array.from(adminConfig.extendedDates),
+    taichungDates: Array.from(adminConfig.taichungDates),
+    blockedSlots: Object.fromEntries(Object.entries(adminConfig.blockedSlots).map(([k,v])=>[k, Array.from(v)]))
+  };
+  try{
+    const res = await fetch(GOOGLE_SCRIPT_URL, {
+      method:'POST', headers:{ 'Content-Type':'text/plain;charset=utf-8' },
+      body: JSON.stringify({ action:'saveSettings', settings })
+    });
+    const result = await res.json();
+    if(!result.success) throw new Error(result.error || '儲存失敗');
+    setStatus('saved');
+  }catch(err){ console.error('儲存設定失敗：', err); setStatus('error'); }
+}
+
+/* ================= render ================= */
+function render(){
+  document.getElementById('card').innerHTML = tplAdmin();
+  bindAdmin();
+}
+function tplAdmin(){
+  return `
+    <h2 class="card-title">管理可預約時間</h2>
+    <p class="card-desc">點選日期後，可設定「台中服務日」、「整天不可預約」、「延長營業至20:00」，或個別關閉特定時段（例如公休日、已被電話預約的時段等）。設定會自動即時儲存。</p>
+    ${!GOOGLE_SCRIPT_URL ? `<div class="admin-note">目前尚未連結 Google 試算表，這裡的設定只是示範，重新整理頁面就會消失，也不會反映到客人端頁面。請依照說明部署 Apps Script，並把網址貼到本檔案開頭的 GOOGLE_SCRIPT_URL。</div>` : ''}
+
+    <div class="cal-head">
+      <button class="cal-nav" id="admin-cal-prev">‹ 上個月</button>
+      <div class="mo">${adminView.year} 年 ${adminView.month+1} 月</div>
+      <button class="cal-nav" id="admin-cal-next">下個月 ›</button>
+    </div>
+    <div class="cal-grid" id="admin-cal-grid">${renderAdminCalGrid()}</div>
+    <div class="cal-legend">
+      <span><i class="dot a"></i>可預約</span>
+      <span><i class="dot e"></i>延長營業至20:00</span>
+      <span><i class="dot c"></i>整天不可預約</span>
+      <span><i class="dot d"></i>已過去</span>
+      <span><span class="cal-tag" style="position:static;">台中</span>台中服務日</span>
+    </div>
+
+    <div id="admin-detail">${renderAdminDetail()}</div>
+
+    <div class="summary-box"><h5>目前已設定「台中服務日」的日期</h5>${renderTaichungList()}</div>
+    <div class="summary-box"><h5>目前已設定「整天不可預約」的日期</h5>${renderClosedList()}</div>
+    <div class="summary-box"><h5>目前已設定「延長營業至20:00」的日期</h5>${renderExtendedList()}</div>
+    <div class="summary-box"><h5>目前已設定「個別時段不可預約」</h5>${renderBlockedList()}</div>
+  `;
+}
+function renderAdminCalGrid(){
+  const {year, month} = adminView;
+  const first = new Date(year, month, 1);
+  const startOffset = first.getDay();
+  const daysInMonth = new Date(year, month+1, 0).getDate();
+  const today = new Date(); today.setHours(0,0,0,0);
+  let html = ['日','一','二','三','四','五','六'].map(d=>`<div class="cal-dow">${d}</div>`).join('');
+  for(let i=0;i<startOffset;i++) html += `<div class="cal-cell empty"></div>`;
+  for(let d=1; d<=daysInMonth; d++){
+    const dt = new Date(year, month, d);
+    const dateStr = fmtDate(dt);
+    const past = isPastDate(dt);
+    const closed = isDateFullyClosed(dateStr);
+    const extended = adminConfig.extendedDates.has(dateStr);
+    const taichung = adminConfig.taichungDates.has(dateStr);
+    const isToday = fmtDate(dt) === fmtDate(today);
+    const isSelected = adminView.selectedDate === dateStr;
+    let cls = 'cal-cell';
+    if(past) cls += ' admin-past';
+    else if(closed) cls += ' admin-closed';
+    else{ cls += ' avail'; if(extended) cls += ' extended'; }
+    if(isToday) cls += ' today';
+    if(isSelected) cls += ' selected';
+    const tag = taichung ? `<span class="cal-tag">台中</span>` : '';
+    html += `<div class="${cls}" data-date="${past?'':dateStr}"><span>${d}</span>${tag}</div>`;
+  }
+  return html;
+}
+function renderAdminDetail(){
+  const date = adminView.selectedDate;
+  if(!date){ return `<div class="empty-note">請先點選一個日期，即可設定當日的預約開放狀況。</div>`; }
+  const closed = isDateFullyClosed(date);
+  const extended = adminConfig.extendedDates.has(date);
+  const taichung = adminConfig.taichungDates.has(date);
+  let html = `
+    <div class="toggle-row">
+      <div><div class="label">${date}　台中服務日</div><div class="sub">開啟後，此日期會標示「台中」，讓客人知道當天在台中服務</div></div>
+      <label class="switch"><input type="checkbox" id="admin-taichung-toggle" ${taichung?'checked':''}><span class="track"></span></label>
+    </div>
+    <div class="toggle-row">
+      <div><div class="label">${date}　整天不可預約</div><div class="sub">開啟後，客人將無法選擇此日期</div></div>
+      <label class="switch"><input type="checkbox" id="admin-closed-toggle" ${closed?'checked':''}><span class="track"></span></label>
+    </div>
+  `;
+  if(!closed){
+    html += `
+    <div class="toggle-row">
+      <div><div class="label">${date}　延長營業至 20:00</div><div class="sub">開啟後，當日時段開放至晚上8點（預設只到13:00）</div></div>
+      <label class="switch"><input type="checkbox" id="admin-extended-toggle" ${extended?'checked':''}><span class="track"></span></label>
+    </div>
+    `;
+    const end = getBusinessEnd(date);
+    const blocked = adminConfig.blockedSlots[date] || new Set();
+    html += `<div class="slot-title">個別時段設定（點選切換，共 ${baseSlots(end).length} 個時段）</div>
+      <div class="admin-slot-grid" id="admin-slot-grid">
+        ${baseSlots(end).map(t=>{ const val=fmtTime(t); const isBlocked=blocked.has(val); return `<div class="admin-slot ${isBlocked?'blocked':''}" data-time="${val}">${val}</div>`; }).join('')}
+      </div>
+      <div class="empty-note">已標記為不可預約的時段會以紅色顯示，客人在該時段將無法預約（若服務時間跨越此時段亦會一併排除）。</div>
+    `;
+  }
+  return html;
+}
+function renderClosedList(){
+  const dates = Array.from(adminConfig.closedDates).sort();
+  if(dates.length===0) return `<div class="summary-empty">尚未設定</div>`;
+  return dates.map(d=>`<div class="summary-item"><span>${d}</span><button class="x" data-remove-closed="${d}">✕</button></div>`).join('');
+}
+function renderTaichungList(){
+  const dates = Array.from(adminConfig.taichungDates).sort();
+  if(dates.length===0) return `<div class="summary-empty">尚未設定</div>`;
+  return dates.map(d=>`<div class="summary-item"><span>${d}（台中）</span><button class="x" data-remove-taichung="${d}">✕</button></div>`).join('');
+}
+function renderExtendedList(){
+  const dates = Array.from(adminConfig.extendedDates).sort();
+  if(dates.length===0) return `<div class="summary-empty">尚未設定</div>`;
+  return dates.map(d=>`<div class="summary-item"><span>${d}（09:00–20:00）</span><button class="x" data-remove-extended="${d}">✕</button></div>`).join('');
+}
+function renderBlockedList(){
+  const entries = Object.entries(adminConfig.blockedSlots).filter(([,set])=>set && set.size>0).sort((a,b)=>a[0].localeCompare(b[0]));
+  if(entries.length===0) return `<div class="summary-empty">尚未設定</div>`;
+  return entries.map(([date,set])=>{
+    const times = Array.from(set).sort().join('、');
+    return `<div class="summary-item"><span>${date}：${times}</span><button class="x" data-remove-blocked="${date}">✕</button></div>`;
+  }).join('');
+}
+function bindAdmin(){
+  document.getElementById('admin-cal-prev').addEventListener('click', ()=>{ adminView.month--; if(adminView.month<0){adminView.month=11; adminView.year--;} render(); });
+  document.getElementById('admin-cal-next').addEventListener('click', ()=>{ adminView.month++; if(adminView.month>11){adminView.month=0; adminView.year++;} render(); });
+  document.getElementById('admin-cal-grid').addEventListener('click', e=>{
+    const c = e.target.closest('.cal-cell'); if(!c || !c.dataset.date) return;
+    adminView.selectedDate = c.dataset.date; render();
+  });
+  const taichungToggle = document.getElementById('admin-taichung-toggle');
+  if(taichungToggle){ taichungToggle.addEventListener('change', ()=>{
+    const date = adminView.selectedDate;
+    if(taichungToggle.checked) adminConfig.taichungDates.add(date); else adminConfig.taichungDates.delete(date);
+    render(); saveSettings();
+  }); }
+  const toggle = document.getElementById('admin-closed-toggle');
+  if(toggle){ toggle.addEventListener('change', ()=>{
+    const date = adminView.selectedDate;
+    if(toggle.checked) adminConfig.closedDates.add(date); else adminConfig.closedDates.delete(date);
+    render(); saveSettings();
+  }); }
+  const extToggle = document.getElementById('admin-extended-toggle');
+  if(extToggle){ extToggle.addEventListener('change', ()=>{
+    const date = adminView.selectedDate;
+    if(extToggle.checked) adminConfig.extendedDates.add(date); else adminConfig.extendedDates.delete(date);
+    render(); saveSettings();
+  }); }
+  const slotGrid = document.getElementById('admin-slot-grid');
+  if(slotGrid){ slotGrid.addEventListener('click', e=>{
+    const cell = e.target.closest('.admin-slot'); if(!cell) return;
+    const date = adminView.selectedDate; const time = cell.dataset.time;
+    if(!adminConfig.blockedSlots[date]) adminConfig.blockedSlots[date] = new Set();
+    const set = adminConfig.blockedSlots[date];
+    if(set.has(time)) set.delete(time); else set.add(time);
+    render(); saveSettings();
+  }); }
+  document.querySelectorAll('[data-remove-closed]').forEach(btn=>{ btn.addEventListener('click', ()=>{ adminConfig.closedDates.delete(btn.dataset.removeClosed); render(); saveSettings(); }); });
+  document.querySelectorAll('[data-remove-taichung]').forEach(btn=>{ btn.addEventListener('click', ()=>{ adminConfig.taichungDates.delete(btn.dataset.removeTaichung); render(); saveSettings(); }); });
+  document.querySelectorAll('[data-remove-extended]').forEach(btn=>{ btn.addEventListener('click', ()=>{ adminConfig.extendedDates.delete(btn.dataset.removeExtended); render(); saveSettings(); }); });
+  document.querySelectorAll('[data-remove-blocked]').forEach(btn=>{ btn.addEventListener('click', ()=>{ delete adminConfig.blockedSlots[btn.dataset.removeBlocked]; render(); saveSettings(); }); });
+}
+
+loadSettings();
+</script>
+</body>
+</html>
