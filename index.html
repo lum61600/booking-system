@@ -5,32 +5,32 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>毛孩預約 | 線上預約系統</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
-<link href="https://fonts.googleapis.com/css2?family=Noto+Serif+TC:wght@600;700;900&family=Noto+Sans+TC:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@600;700;800&family=Noto+Sans+TC:wght@400;500;600;700;900&display=swap" rel="stylesheet">
 <style>
   :root{
-    --cream:#F7F6EE; --cream-2:#EFEDDE; --pine:#748CAE; --pine-2:#5D7396;
-    --sage:#A9BBD1; --sage-light:#E4EAF2; --apricot:#E4943D; --apricot-dark:#C97A28;
-    --blush:#EFB79D; --ink:#26241F; --ink-soft:#5B5647; --line:#DAD8C9;
-    --white:#FFFDF9; --danger:#C15B4A; --danger-light:#F6E4DF; --radius:18px;
+    --cream:#D7EBE0; --cream-2:#C7E4D5; --pine:#5CA48E; --pine-2:#4A8875;
+    --sage:#A9D6C1; --sage-light:#EDF6F1; --apricot:#EFAA7C; --apricot-dark:#D98F5C;
+    --blush:#F6C9A2; --ink:#3B2B1E; --ink-soft:#6B5A48; --line:#CDE6DA;
+    --white:#FFFFFF; --danger:#C15B4A; --danger-light:#F6E4DF; --radius:22px;
   }
   *{box-sizing:border-box;}
   html,body{margin:0;padding:0;}
   body{
     background:var(--cream);
     background-image:
-      radial-gradient(circle at 8% 12%, rgba(143,176,156,0.18) 0, transparent 40%),
-      radial-gradient(circle at 92% 85%, rgba(228,148,61,0.12) 0, transparent 45%);
+      radial-gradient(circle at 8% 12%, rgba(255,255,255,0.35) 0, transparent 40%),
+      radial-gradient(circle at 92% 85%, rgba(229,143,87,0.14) 0, transparent 45%);
     color:var(--ink); font-family:"Noto Sans TC", sans-serif;
     min-height:100vh; padding:32px 16px 60px; -webkit-font-smoothing:antialiased;
   }
   .wrap{max-width:640px;margin:0 auto;}
   .brand{display:flex;align-items:center;gap:12px;margin-bottom:22px;}
   .brand-mark{
-    width:46px;height:46px;border-radius:14px;background:var(--pine);
+    width:50px;height:50px;border-radius:50%;background:var(--pine);
     display:flex;align-items:center;justify-content:center;flex-shrink:0;
-    box-shadow:0 4px 10px rgba(38,67,58,0.25);
+    box-shadow:0 4px 10px rgba(46,104,88,0.3);
   }
-  .brand-name{font-family:"Noto Serif TC", serif;font-weight:900;font-size:22px;color:var(--pine);letter-spacing:0.5px;line-height:1.1;}
+  .brand-name{font-family:"Baloo 2","Noto Sans TC",sans-serif;font-weight:800;font-size:23px;color:var(--pine);letter-spacing:0.3px;line-height:1.1;}
   .brand-sub{font-size:12.5px;color:var(--ink-soft);letter-spacing:1px;margin-top:2px;}
 
   .progress{display:flex;justify-content:space-between;margin-bottom:26px;position:relative;padding:0 4px;}
@@ -56,7 +56,7 @@
   .bubbles span:nth-child(5){width:7px;height:7px;}
 
   .card{background:var(--white);border-radius:var(--radius);border:1px solid var(--line);box-shadow:0 10px 30px rgba(38,67,58,0.08);padding:26px 22px 24px;}
-  .card-title{font-family:"Noto Serif TC", serif;font-weight:700;font-size:20px;color:var(--pine);margin:0 0 4px;}
+  .card-title{font-family:"Baloo 2","Noto Sans TC",sans-serif;font-weight:700;font-size:20px;color:var(--pine);margin:0 0 4px;}
   .card-desc{font-size:13px;color:var(--ink-soft);margin:0 0 20px;line-height:1.6;}
 
   .field{margin-bottom:16px;}
@@ -90,19 +90,22 @@
   .svc-card{border:1.5px solid var(--line);border-radius:14px;padding:16px 14px;cursor:pointer;background:var(--cream);transition:all .15s ease;text-align:left;}
   .svc-card:hover{border-color:var(--sage);}
   .svc-card.active{border-color:var(--apricot);background:#FFF6EA;box-shadow:0 0 0 3px rgba(228,148,61,0.15);}
-  .svc-icon{font-size:22px;margin-bottom:6px;display:block;}
+  .svc-icon{display:block;margin-bottom:6px;}
+  .svc-icon svg{width:36px;height:36px;}
   .svc-name{font-weight:700;font-size:15px;color:var(--pine);}
   .svc-sub{font-size:11.5px;color:var(--ink-soft);margin-top:3px;}
 
   .choice-row{display:flex;gap:10px;margin-bottom:16px;}
   .choice-pill{flex:1;padding:12px;border-radius:12px;text-align:center;border:1.5px solid var(--line);background:var(--cream);font-weight:600;font-size:13.5px;color:var(--ink-soft);cursor:pointer;}
+  .choice-pill.icon-pill{display:flex;flex-direction:column;align-items:center;gap:6px;padding:14px 10px 12px;}
+  .choice-pill.icon-pill svg{width:42px;height:42px;flex-shrink:0;}
   .choice-pill.active{background:var(--pine);border-color:var(--pine);color:#fff;}
 
   .duration-box{background:var(--sage-light);border-radius:12px;padding:12px 14px;display:flex;align-items:center;justify-content:space-between;font-size:13.5px;color:var(--pine);font-weight:600;margin-top:6px;margin-bottom:20px;}
-  .duration-box b{font-family:"Noto Serif TC",serif;font-size:16px;}
+  .duration-box b{font-family:"Baloo 2","Noto Sans TC",sans-serif;font-size:16px;}
 
   .cal-head{display:flex;align-items:center;justify-content:space-between;margin-bottom:12px;}
-  .cal-head .mo{font-family:"Noto Serif TC",serif;font-weight:700;font-size:16px;color:var(--pine);}
+  .cal-head .mo{font-family:"Baloo 2","Noto Sans TC",sans-serif;font-weight:700;font-size:16px;color:var(--pine);}
   .cal-nav button{height:30px;border-radius:8px;border:1.5px solid var(--line);background:var(--cream);cursor:pointer;font-size:12.5px;color:var(--pine);padding:0 10px;font-family:inherit;font-weight:600;}
   .cal-grid{display:grid;grid-template-columns:repeat(7,1fr);gap:6px;margin-bottom:8px;}
   .cal-dow{text-align:center;font-size:11px;color:var(--ink-soft);font-weight:700;padding-bottom:4px;}
@@ -157,9 +160,9 @@
 
   .success{text-align:center;padding:10px 6px 4px;}
   .success .paw{width:64px;height:64px;border-radius:50%;background:var(--sage-light);display:flex;align-items:center;justify-content:center;margin:0 auto 16px;}
-  .success h2{font-family:"Noto Serif TC",serif;color:var(--pine);margin:0 0 6px;}
+  .success h2{font-family:"Baloo 2","Noto Sans TC",sans-serif;color:var(--pine);margin:0 0 6px;}
   .success p{color:var(--ink-soft);font-size:13.5px;margin:0 0 20px;}
-  .conf-code{display:inline-block;background:var(--pine);color:#fff;padding:8px 18px;border-radius:10px;font-weight:700;letter-spacing:2px;font-family:"Noto Serif TC",serif;margin-bottom:14px;}
+  .conf-code{display:inline-block;background:var(--pine);color:#fff;padding:8px 18px;border-radius:10px;font-weight:700;letter-spacing:2px;font-family:"Baloo 2","Noto Sans TC",sans-serif;margin-bottom:14px;}
   .pending-badge{
     display:inline-flex;align-items:center;gap:6px;background:#FFF1DC;color:var(--apricot-dark);
     padding:8px 16px;border-radius:99px;font-size:12.5px;font-weight:700;margin-bottom:18px;
@@ -168,7 +171,7 @@
     background:var(--sage-light);border-radius:14px;padding:16px;margin-bottom:20px;text-align:left;
   }
   .code-box .lbl{font-size:11.5px;color:var(--ink-soft);margin-bottom:6px;}
-  .code-box .code{font-family:"Noto Serif TC",serif;font-size:22px;font-weight:900;color:var(--pine);letter-spacing:3px;}
+  .code-box .code{font-family:"Baloo 2","Noto Sans TC",sans-serif;font-size:22px;font-weight:900;color:var(--pine);letter-spacing:3px;}
   .code-box .tip{font-size:11.5px;color:var(--ink-soft);margin-top:6px;line-height:1.5;}
 
   .masked-card{background:var(--sage-light);border-radius:14px;padding:16px;margin:16px 0;}
@@ -186,8 +189,8 @@
   <div class="brand">
     <div class="brand-mark">
       <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
-        <circle cx="7" cy="8" r="2" fill="#F7F6EE"/><circle cx="12" cy="6" r="2" fill="#F7F6EE"/><circle cx="17" cy="8" r="2" fill="#F7F6EE"/>
-        <path d="M12 11c-3 0-5.5 2.2-5.5 4.6 0 1.6 1.3 2.4 2.7 1.9.9-.3 1.7-.5 2.8-.5s1.9.2 2.8.5c1.4.5 2.7-.3 2.7-1.9C17.5 13.2 15 11 12 11z" fill="#F7F6EE"/>
+        <circle cx="7" cy="8" r="2" fill="#FFFFFF"/><circle cx="12" cy="6" r="2" fill="#FFFFFF"/><circle cx="17" cy="8" r="2" fill="#FFFFFF"/>
+        <path d="M12 11c-3 0-5.5 2.2-5.5 4.6 0 1.6 1.3 2.4 2.7 1.9.9-.3 1.7-.5 2.8-.5s1.9.2 2.8.5c1.4.5 2.7-.3 2.7-1.9C17.5 13.2 15 11 12 11z" fill="#FFFFFF"/>
       </svg>
     </div>
     <div>
@@ -242,8 +245,61 @@ function isSlotBlocked(dateStr, startMin, durationMin){
 }
 function esc(str){ return String(str==null?'':str).replace(/[&<>"']/g, m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m])); }
 function svgPaw(color){
-  color = color || '#A9BBD1';
+  color = color || '#A9D6C1';
   return `<svg viewBox="0 0 24 24" fill="none"><circle cx="7" cy="8" r="1.8" fill="${color}"/><circle cx="12" cy="6" r="1.8" fill="${color}"/><circle cx="17" cy="8" r="1.8" fill="${color}"/><path d="M12 11c-3 0-5.5 2.2-5.5 4.6 0 1.6 1.3 2.4 2.7 1.9.9-.3 1.7-.5 2.8-.5s1.9.2 2.8.5c1.4.5 2.7-.3 2.7-1.9C17.5 13.2 15 11 12 11z" fill="${color}"/></svg>`;
+}
+function svgDogIcon(){
+  return `<svg viewBox="0 0 64 64" fill="none">
+    <circle cx="44" cy="32" r="11" fill="#D9A066"/>
+    <circle cx="38" cy="21.6" r="11" fill="#D9A066"/>
+    <circle cx="26" cy="21.6" r="11" fill="#D9A066"/>
+    <circle cx="20" cy="32" r="11" fill="#D9A066"/>
+    <circle cx="26" cy="42.4" r="11" fill="#D9A066"/>
+    <circle cx="38" cy="42.4" r="11" fill="#D9A066"/>
+    <circle cx="32" cy="32" r="15" fill="#D9A066"/>
+    <path d="M16 20 Q10 26 16 32 Q22 38 16 44" stroke="#3B2B1E" stroke-width="2.2" fill="none" stroke-linecap="round" stroke-linejoin="round"/>
+    <ellipse cx="37" cy="27" rx="1.9" ry="2.6" fill="#3B2B1E"/>
+    <ellipse cx="44.5" cy="27" rx="1.9" ry="2.6" fill="#3B2B1E"/>
+    <rect x="38.5" y="33" width="5.5" height="4.5" rx="1.6" fill="#3B2B1E"/>
+  </svg>`;
+}
+function svgScissorsIcon(){
+  return `<svg viewBox="0 0 64 64" fill="none">
+    <path d="M32 30 L14 12" stroke="#5CA48E" stroke-width="5" stroke-linecap="round"/>
+    <path d="M32 30 L50 12" stroke="#EFAA7C" stroke-width="5" stroke-linecap="round"/>
+    <path d="M32 30 L20 46" stroke="#3B2B1E" stroke-width="4" stroke-linecap="round"/>
+    <path d="M32 30 L44 46" stroke="#3B2B1E" stroke-width="4" stroke-linecap="round"/>
+    <circle cx="32" cy="30" r="3.2" fill="#3B2B1E"/>
+    <circle cx="18" cy="49" r="7" fill="none" stroke="#3B2B1E" stroke-width="3.5"/>
+    <circle cx="46" cy="49" r="7" fill="none" stroke="#3B2B1E" stroke-width="3.5"/>
+  </svg>`;
+}
+function svgBathIcon(){
+  return `<svg viewBox="0 0 64 64" fill="none">
+    <path d="M10 34 h44 v5 a15 15 0 0 1 -15 15 h-14 a15 15 0 0 1 -15 -15 z" fill="#A9D6C1"/>
+    <rect x="8" y="29" width="48" height="8" rx="4" fill="#5CA48E"/>
+    <circle cx="10" cy="46" r="3" fill="#5CA48E"/>
+    <circle cx="21" cy="15" r="4.5" fill="#EDF6F1" stroke="#5CA48E" stroke-width="1.6"/>
+    <circle cx="30" cy="8" r="3.2" fill="#EDF6F1" stroke="#5CA48E" stroke-width="1.6"/>
+    <circle cx="36" cy="17" r="2.6" fill="#EDF6F1" stroke="#5CA48E" stroke-width="1.6"/>
+  </svg>`;
+}
+function svgCatIcon(){
+  return `<svg viewBox="0 0 64 64" fill="none">
+    <path d="M17 24 12 9 27 20z" fill="#8FC4AC"/>
+    <path d="M47 24 52 9 37 20z" fill="#8FC4AC"/>
+    <circle cx="44" cy="32" r="10" fill="#8FC4AC"/>
+    <circle cx="38" cy="23" r="10" fill="#8FC4AC"/>
+    <circle cx="26" cy="23" r="10" fill="#8FC4AC"/>
+    <circle cx="20" cy="32" r="10" fill="#8FC4AC"/>
+    <circle cx="26" cy="41" r="10" fill="#8FC4AC"/>
+    <circle cx="38" cy="41" r="10" fill="#8FC4AC"/>
+    <circle cx="32" cy="32" r="14" fill="#8FC4AC"/>
+    <path d="M14 34 L22 33 M14 39 L22 37" stroke="#3B2B1E" stroke-width="1.6" stroke-linecap="round"/>
+    <ellipse cx="37" cy="27" rx="1.9" ry="2.6" fill="#3B2B1E"/>
+    <ellipse cx="44.5" cy="27" rx="1.9" ry="2.6" fill="#3B2B1E"/>
+    <path d="M39 34 L44 34 L41.5 37z" fill="#3B2B1E"/>
+  </svg>`;
 }
 function maskName(name){ if(!name) return '—'; const chars = Array.from(name); return chars[0] + '○'.repeat(Math.max(chars.length-1,1)); }
 function extractCityDistrict(address){
@@ -343,14 +399,14 @@ function tplStep1(){
     <h2 class="card-title">選擇服務與時段</h2>
     <p class="card-desc">選好服務類型後，下方會立即顯示可預約的日期與時段，一目了然。</p>
     <div class="svc-grid" id="svc-grid">
-      <div class="svc-card ${s.category==='grooming'?'active':''}" data-svc="grooming"><span class="svc-icon">✂️</span><div class="svc-name">美容</div><div class="svc-sub">貓／狗（長毛・短毛）均約 2 小時</div></div>
-      <div class="svc-card ${s.category==='bath'?'active':''}" data-svc="bath"><span class="svc-icon">🛁</span><div class="svc-name">洗澡</div><div class="svc-sub">依貓／狗與毛長，時間不同</div></div>
+      <div class="svc-card ${s.category==='grooming'?'active':''}" data-svc="grooming"><span class="svc-icon">${svgScissorsIcon()}</span><div class="svc-name">美容</div><div class="svc-sub">貓／狗（長毛・短毛）均約 2 小時</div></div>
+      <div class="svc-card ${s.category==='bath'?'active':''}" data-svc="bath"><span class="svc-icon">${svgBathIcon()}</span><div class="svc-name">洗澡</div><div class="svc-sub">依貓／狗與毛長，時間不同</div></div>
     </div>
     <div class="field">
       <label>寵物類別</label>
       <div class="choice-row" id="animal-row">
-        <div class="choice-pill ${s.animalType==='cat'?'active':''}" data-a="cat">🐱 貓咪</div>
-        <div class="choice-pill ${s.animalType==='dog'?'active':''}" data-a="dog">🐶 狗狗</div>
+        <div class="choice-pill icon-pill ${s.animalType==='cat'?'active':''}" data-a="cat">${svgCatIcon()}<span>貓咪</span></div>
+        <div class="choice-pill icon-pill ${s.animalType==='dog'?'active':''}" data-a="dog">${svgDogIcon()}<span>狗狗</span></div>
       </div>
     </div>
     ${showDogHair ? `
