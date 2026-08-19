@@ -4,13 +4,19 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>毛孩預約 | 線上預約系統</title>
+<link rel="manifest" href="manifest.json">
+<meta name="theme-color" content="#3D6FA8">
+<link rel="apple-touch-icon" href="icons/apple-touch-icon.png">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="毛孩預約">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@600;700;800&family=Noto+Sans+TC:wght@400;500;600;700;900&display=swap" rel="stylesheet">
 <style>
   :root{
-    --cream:#D7EBE0; --cream-2:#C7E4D5; --pine:#5CA48E; --pine-2:#4A8875;
-    --sage:#A9D6C1; --sage-light:#EDF6F1; --apricot:#EFAA7C; --apricot-dark:#D98F5C;
-    --blush:#F6C9A2; --ink:#3B2B1E; --ink-soft:#6B5A48; --line:#CDE6DA;
+    --cream:#EAF0FA; --cream-2:#DCE6F5; --pine:#3D6FA8; --pine-2:#2A5480;
+    --sage:#8FB8E0; --sage-light:#E3EDF9; --apricot:#29B6E8; --apricot-dark:#1D96C2;
+    --blush:#B8C5EA; --ink:#1A3A56; --ink-soft:#4A6785; --line:#C7D9EF;
     --white:#FFFFFF; --danger:#C15B4A; --danger-light:#F6E4DF; --radius:22px;
   }
   *{box-sizing:border-box;}
@@ -89,7 +95,7 @@
   .svc-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:18px;}
   .svc-card{border:1.5px solid var(--line);border-radius:14px;padding:16px 14px;cursor:pointer;background:var(--cream);transition:all .15s ease;text-align:left;}
   .svc-card:hover{border-color:var(--sage);}
-  .svc-card.active{border-color:var(--apricot);background:#FFF6EA;box-shadow:0 0 0 3px rgba(228,148,61,0.15);}
+  .svc-card.active{border-color:var(--apricot);background:#E5F8FD;box-shadow:0 0 0 3px rgba(228,148,61,0.15);}
   .svc-icon{display:block;margin-bottom:6px;}
   .svc-icon svg{width:36px;height:36px;}
   .svc-name{font-weight:700;font-size:15px;color:var(--pine);}
@@ -112,30 +118,31 @@
   .cal-cell{
     aspect-ratio:1/1;display:flex;flex-direction:column;align-items:center;justify-content:center;
     border-radius:10px;font-size:13.5px;font-weight:600;cursor:pointer;border:1.5px solid transparent;
-    color:var(--ink);background:var(--cream);gap:1px;position:relative;
+    color:var(--ink);background:transparent;gap:1px;position:relative;
   }
   .cal-cell.empty{visibility:hidden;cursor:default;}
-  .cal-cell.disabled{color:#C9C0AC;background:#F1ECE0;cursor:not-allowed;}
+  .cal-cell.avail{background:#FFFFFF;border-color:var(--line);box-shadow:0 1px 3px rgba(26,58,86,0.06);}
+  .cal-cell.disabled{color:#B7C4D6;background:transparent;cursor:not-allowed;}
   .cal-cell.avail:hover{border-color:var(--sage);}
-  .cal-cell.selected{background:var(--apricot);color:#fff;}
+  .cal-cell.selected{background:var(--apricot);border-color:var(--apricot);color:#fff;}
   .cal-cell.today{box-shadow:inset 0 0 0 1.5px var(--pine);}
-  .cal-cell.extended{background:#FFF1DC;box-shadow:inset 0 0 0 1.5px var(--apricot);color:var(--apricot-dark);}
+  .cal-cell.extended{background:#DFF6FC;border-color:var(--apricot);box-shadow:inset 0 0 0 1.5px var(--apricot);color:var(--apricot-dark);}
   .cal-cell.extended.selected{background:var(--apricot);color:#fff;}
   .cal-tag{font-size:8.5px;font-weight:700;line-height:1;background:var(--pine);color:#fff;padding:1.5px 4px;border-radius:5px;letter-spacing:0.5px;}
   .cal-cell.selected .cal-tag{background:#fff;color:var(--pine);}
   .cal-legend{display:flex;gap:16px;font-size:11.5px;color:var(--ink-soft);margin:6px 0 18px;flex-wrap:wrap;}
   .cal-legend span{display:inline-flex;align-items:center;gap:5px;}
   .dot{width:9px;height:9px;border-radius:50%;display:inline-block;}
-  .dot.a{background:var(--cream);border:1.5px solid var(--sage);}
-  .dot.d{background:#F1ECE0;border:1.5px solid #C9C0AC;}
-  .dot.e{background:#FFF1DC;border:1.5px solid var(--apricot);}
+  .dot.a{background:#FFFFFF;border:1.5px solid var(--line);}
+  .dot.d{background:transparent;border:1.5px dashed #B7C4D6;}
+  .dot.e{background:#DFF6FC;border:1.5px solid var(--apricot);}
 
   .slot-title{font-size:13px;font-weight:700;color:var(--pine);margin:4px 0 10px;}
   .slot-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:9px;}
   .slot{padding:10px 6px;border-radius:10px;border:1.5px solid var(--line);background:var(--cream);text-align:center;font-size:13px;font-weight:600;color:var(--ink);cursor:pointer;}
   .slot:hover{border-color:var(--sage);}
   .slot.selected{background:var(--pine);border-color:var(--pine);color:#fff;}
-  .slot.taken{background:#F1ECE0;color:#C9C0AC;cursor:not-allowed;text-decoration:line-through;}
+  .slot.taken{background:#E4EAF2;color:#9FB0C4;cursor:not-allowed;text-decoration:line-through;}
   .empty-note{font-size:13px;color:var(--ink-soft);background:var(--cream);border-radius:10px;padding:14px;text-align:center;}
 
   .review-block{background:var(--cream);border-radius:14px;padding:16px;margin-bottom:14px;}
@@ -153,7 +160,7 @@
   .btn:active{transform:scale(0.98);}
   .btn-primary{background:var(--apricot);color:#fff;}
   .btn-primary:hover{background:var(--apricot-dark);}
-  .btn-primary:disabled{background:#E8D9C4;color:#fff;cursor:not-allowed;}
+  .btn-primary:disabled{background:#D8E2F0;color:#fff;cursor:not-allowed;}
   .btn-ghost{background:var(--cream);color:var(--pine);border:1.5px solid var(--line);flex:0 0 100px;}
   .btn-ghost:hover{background:var(--sage-light);}
   .err{color:var(--danger);font-size:12px;margin-top:5px;}
@@ -164,7 +171,7 @@
   .success p{color:var(--ink-soft);font-size:13.5px;margin:0 0 20px;}
   .conf-code{display:inline-block;background:var(--pine);color:#fff;padding:8px 18px;border-radius:10px;font-weight:700;letter-spacing:2px;font-family:"Baloo 2","Noto Sans TC",sans-serif;margin-bottom:14px;}
   .pending-badge{
-    display:inline-flex;align-items:center;gap:6px;background:#FFF1DC;color:var(--apricot-dark);
+    display:inline-flex;align-items:center;gap:6px;background:#DFF6FC;color:var(--apricot-dark);
     padding:8px 16px;border-radius:99px;font-size:12.5px;font-weight:700;margin-bottom:18px;
   }
   .code-box{
@@ -176,6 +183,17 @@
 
   .masked-card{background:var(--sage-light);border-radius:14px;padding:16px;margin:16px 0;}
   .masked-card h4{margin:0 0 10px;font-size:12.5px;color:var(--pine);letter-spacing:1px;font-weight:700;}
+
+  .install-banner{
+    background:var(--pine);color:#fff;border-radius:14px;
+    display:flex;align-items:center;justify-content:space-between;gap:10px;
+    padding:10px 14px;font-size:12.5px;margin-bottom:16px;line-height:1.5;
+  }
+  .install-banner b{font-weight:800;}
+  .install-banner .btns{display:flex;gap:8px;flex-shrink:0;}
+  .install-banner button{border:none;border-radius:8px;padding:7px 12px;font-weight:700;cursor:pointer;font-family:inherit;font-size:12px;}
+  .install-banner .install-go{background:#fff;color:var(--pine);}
+  .install-banner .install-close{background:rgba(255,255,255,0.25);color:#fff;padding:7px 10px;}
 
   @media (max-width:420px){
     .svc-grid{grid-template-columns:1fr;}
@@ -245,60 +263,60 @@ function isSlotBlocked(dateStr, startMin, durationMin){
 }
 function esc(str){ return String(str==null?'':str).replace(/[&<>"']/g, m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m])); }
 function svgPaw(color){
-  color = color || '#A9D6C1';
+  color = color || '#8FB8E0';
   return `<svg viewBox="0 0 24 24" fill="none"><circle cx="7" cy="8" r="1.8" fill="${color}"/><circle cx="12" cy="6" r="1.8" fill="${color}"/><circle cx="17" cy="8" r="1.8" fill="${color}"/><path d="M12 11c-3 0-5.5 2.2-5.5 4.6 0 1.6 1.3 2.4 2.7 1.9.9-.3 1.7-.5 2.8-.5s1.9.2 2.8.5c1.4.5 2.7-.3 2.7-1.9C17.5 13.2 15 11 12 11z" fill="${color}"/></svg>`;
 }
 function svgDogIcon(){
   return `<svg viewBox="0 0 64 64" fill="none">
-    <circle cx="44" cy="32" r="11" fill="#D9A066"/>
-    <circle cx="38" cy="21.6" r="11" fill="#D9A066"/>
-    <circle cx="26" cy="21.6" r="11" fill="#D9A066"/>
-    <circle cx="20" cy="32" r="11" fill="#D9A066"/>
-    <circle cx="26" cy="42.4" r="11" fill="#D9A066"/>
-    <circle cx="38" cy="42.4" r="11" fill="#D9A066"/>
-    <circle cx="32" cy="32" r="15" fill="#D9A066"/>
-    <path d="M16 20 Q10 26 16 32 Q22 38 16 44" stroke="#3B2B1E" stroke-width="2.2" fill="none" stroke-linecap="round" stroke-linejoin="round"/>
-    <ellipse cx="37" cy="27" rx="1.9" ry="2.6" fill="#3B2B1E"/>
-    <ellipse cx="44.5" cy="27" rx="1.9" ry="2.6" fill="#3B2B1E"/>
-    <rect x="38.5" y="33" width="5.5" height="4.5" rx="1.6" fill="#3B2B1E"/>
+    <circle cx="44" cy="32" r="11" fill="#C3D3F0"/>
+    <circle cx="38" cy="21.6" r="11" fill="#C3D3F0"/>
+    <circle cx="26" cy="21.6" r="11" fill="#C3D3F0"/>
+    <circle cx="20" cy="32" r="11" fill="#C3D3F0"/>
+    <circle cx="26" cy="42.4" r="11" fill="#C3D3F0"/>
+    <circle cx="38" cy="42.4" r="11" fill="#C3D3F0"/>
+    <circle cx="32" cy="32" r="15" fill="#C3D3F0"/>
+    <path d="M16 20 Q10 26 16 32 Q22 38 16 44" stroke="#1A3A56" stroke-width="2.2" fill="none" stroke-linecap="round" stroke-linejoin="round"/>
+    <ellipse cx="37" cy="27" rx="1.9" ry="2.6" fill="#1A3A56"/>
+    <ellipse cx="44.5" cy="27" rx="1.9" ry="2.6" fill="#1A3A56"/>
+    <rect x="38.5" y="33" width="5.5" height="4.5" rx="1.6" fill="#1A3A56"/>
   </svg>`;
 }
 function svgScissorsIcon(){
   return `<svg viewBox="0 0 64 64" fill="none">
-    <path d="M32 30 L14 12" stroke="#5CA48E" stroke-width="5" stroke-linecap="round"/>
-    <path d="M32 30 L50 12" stroke="#EFAA7C" stroke-width="5" stroke-linecap="round"/>
-    <path d="M32 30 L20 46" stroke="#3B2B1E" stroke-width="4" stroke-linecap="round"/>
-    <path d="M32 30 L44 46" stroke="#3B2B1E" stroke-width="4" stroke-linecap="round"/>
-    <circle cx="32" cy="30" r="3.2" fill="#3B2B1E"/>
-    <circle cx="18" cy="49" r="7" fill="none" stroke="#3B2B1E" stroke-width="3.5"/>
-    <circle cx="46" cy="49" r="7" fill="none" stroke="#3B2B1E" stroke-width="3.5"/>
+    <path d="M32 30 L14 12" stroke="#3D6FA8" stroke-width="5" stroke-linecap="round"/>
+    <path d="M32 30 L50 12" stroke="#29B6E8" stroke-width="5" stroke-linecap="round"/>
+    <path d="M32 30 L20 46" stroke="#1A3A56" stroke-width="4" stroke-linecap="round"/>
+    <path d="M32 30 L44 46" stroke="#1A3A56" stroke-width="4" stroke-linecap="round"/>
+    <circle cx="32" cy="30" r="3.2" fill="#1A3A56"/>
+    <circle cx="18" cy="49" r="7" fill="none" stroke="#1A3A56" stroke-width="3.5"/>
+    <circle cx="46" cy="49" r="7" fill="none" stroke="#1A3A56" stroke-width="3.5"/>
   </svg>`;
 }
 function svgBathIcon(){
   return `<svg viewBox="0 0 64 64" fill="none">
-    <path d="M10 34 h44 v5 a15 15 0 0 1 -15 15 h-14 a15 15 0 0 1 -15 -15 z" fill="#A9D6C1"/>
-    <rect x="8" y="29" width="48" height="8" rx="4" fill="#5CA48E"/>
-    <circle cx="10" cy="46" r="3" fill="#5CA48E"/>
-    <circle cx="21" cy="15" r="4.5" fill="#EDF6F1" stroke="#5CA48E" stroke-width="1.6"/>
-    <circle cx="30" cy="8" r="3.2" fill="#EDF6F1" stroke="#5CA48E" stroke-width="1.6"/>
-    <circle cx="36" cy="17" r="2.6" fill="#EDF6F1" stroke="#5CA48E" stroke-width="1.6"/>
+    <path d="M10 34 h44 v5 a15 15 0 0 1 -15 15 h-14 a15 15 0 0 1 -15 -15 z" fill="#8FB8E0"/>
+    <rect x="8" y="29" width="48" height="8" rx="4" fill="#3D6FA8"/>
+    <circle cx="10" cy="46" r="3" fill="#3D6FA8"/>
+    <circle cx="21" cy="15" r="4.5" fill="#E3EDF9" stroke="#3D6FA8" stroke-width="1.6"/>
+    <circle cx="30" cy="8" r="3.2" fill="#E3EDF9" stroke="#3D6FA8" stroke-width="1.6"/>
+    <circle cx="36" cy="17" r="2.6" fill="#E3EDF9" stroke="#3D6FA8" stroke-width="1.6"/>
   </svg>`;
 }
 function svgCatIcon(){
   return `<svg viewBox="0 0 64 64" fill="none">
-    <path d="M17 24 12 9 27 20z" fill="#8FC4AC"/>
-    <path d="M47 24 52 9 37 20z" fill="#8FC4AC"/>
-    <circle cx="44" cy="32" r="10" fill="#8FC4AC"/>
-    <circle cx="38" cy="23" r="10" fill="#8FC4AC"/>
-    <circle cx="26" cy="23" r="10" fill="#8FC4AC"/>
-    <circle cx="20" cy="32" r="10" fill="#8FC4AC"/>
-    <circle cx="26" cy="41" r="10" fill="#8FC4AC"/>
-    <circle cx="38" cy="41" r="10" fill="#8FC4AC"/>
-    <circle cx="32" cy="32" r="14" fill="#8FC4AC"/>
-    <path d="M14 34 L22 33 M14 39 L22 37" stroke="#3B2B1E" stroke-width="1.6" stroke-linecap="round"/>
-    <ellipse cx="37" cy="27" rx="1.9" ry="2.6" fill="#3B2B1E"/>
-    <ellipse cx="44.5" cy="27" rx="1.9" ry="2.6" fill="#3B2B1E"/>
-    <path d="M39 34 L44 34 L41.5 37z" fill="#3B2B1E"/>
+    <path d="M17 24 12 9 27 20z" fill="#A8DAF0"/>
+    <path d="M47 24 52 9 37 20z" fill="#A8DAF0"/>
+    <circle cx="44" cy="32" r="10" fill="#A8DAF0"/>
+    <circle cx="38" cy="23" r="10" fill="#A8DAF0"/>
+    <circle cx="26" cy="23" r="10" fill="#A8DAF0"/>
+    <circle cx="20" cy="32" r="10" fill="#A8DAF0"/>
+    <circle cx="26" cy="41" r="10" fill="#A8DAF0"/>
+    <circle cx="38" cy="41" r="10" fill="#A8DAF0"/>
+    <circle cx="32" cy="32" r="14" fill="#A8DAF0"/>
+    <path d="M14 34 L22 33 M14 39 L22 37" stroke="#1A3A56" stroke-width="1.6" stroke-linecap="round"/>
+    <ellipse cx="37" cy="27" rx="1.9" ry="2.6" fill="#1A3A56"/>
+    <ellipse cx="44.5" cy="27" rx="1.9" ry="2.6" fill="#1A3A56"/>
+    <path d="M39 34 L44 34 L41.5 37z" fill="#1A3A56"/>
   </svg>`;
 }
 function maskName(name){ if(!name) return '—'; const chars = Array.from(name); return chars[0] + '○'.repeat(Math.max(chars.length-1,1)); }
@@ -787,6 +805,44 @@ document.addEventListener('click', e=>{
 
 render();
 loadAvailability().then(()=>{ render(); });
+
+if('serviceWorker' in navigator){
+  window.addEventListener('load', ()=>{ navigator.serviceWorker.register('sw.js').catch(()=>{}); });
+}
+
+/* ================= 加入主畫面提示條 ================= */
+let deferredInstallPrompt = null;
+function isIOS(){ return /iphone|ipad|ipod/i.test(navigator.userAgent) && !window.MSStream; }
+function isStandalone(){ return window.matchMedia('(display-mode: standalone)').matches || window.navigator.standalone === true; }
+function showInstallBanner(mode){
+  if(isStandalone() || document.getElementById('installBanner')) return;
+  const wrap = document.querySelector('.wrap');
+  const banner = document.createElement('div');
+  banner.id = 'installBanner';
+  banner.className = 'install-banner';
+  if(mode==='android'){
+    banner.innerHTML = `<span>加入主畫面，像 App 一樣使用</span><span class="btns"><button class="install-go" id="installGoBtn">安裝</button><button class="install-close" id="installCloseBtn">✕</button></span>`;
+  } else {
+    banner.innerHTML = `<span>iPhone 用戶：點下方 <b>分享</b> 圖示 → <b>加入主畫面</b></span><span class="btns"><button class="install-close" id="installCloseBtn">✕</button></span>`;
+  }
+  wrap.insertBefore(banner, wrap.firstChild);
+  document.getElementById('installCloseBtn').addEventListener('click', ()=>banner.remove());
+  const goBtn = document.getElementById('installGoBtn');
+  if(goBtn){
+    goBtn.addEventListener('click', async ()=>{
+      banner.remove();
+      if(deferredInstallPrompt){ deferredInstallPrompt.prompt(); await deferredInstallPrompt.userChoice; deferredInstallPrompt = null; }
+    });
+  }
+}
+window.addEventListener('beforeinstallprompt', (e)=>{
+  e.preventDefault();
+  deferredInstallPrompt = e;
+  showInstallBanner('android');
+});
+window.addEventListener('load', ()=>{
+  if(!isStandalone() && isIOS()){ setTimeout(()=>showInstallBanner('ios'), 1000); }
+});
 </script>
 </body>
 </html>

@@ -4,13 +4,19 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>毛孩預約 | 店家後台</title>
+<link rel="manifest" href="admin-manifest.json">
+<meta name="theme-color" content="#3D6FA8">
+<link rel="apple-touch-icon" href="icons/apple-touch-icon.png">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="毛孩後台">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@600;700;800&family=Noto+Sans+TC:wght@400;500;600;700;900&display=swap" rel="stylesheet">
 <style>
   :root{
-    --cream:#D7EBE0; --pine:#5CA48E; --sage:#A9D6C1; --sage-light:#EDF6F1;
-    --apricot:#EFAA7C; --apricot-dark:#D98F5C; --ink:#3B2B1E; --ink-soft:#6B5A48;
-    --line:#CDE6DA; --white:#FFFFFF; --danger:#C15B4A; --danger-light:#F6E4DF; --radius:22px;
+    --cream:#EAF0FA; --pine:#3D6FA8; --sage:#8FB8E0; --sage-light:#E3EDF9;
+    --apricot:#29B6E8; --apricot-dark:#1D96C2; --ink:#1A3A56; --ink-soft:#4A6785;
+    --line:#C7D9EF; --white:#FFFFFF; --danger:#C15B4A; --danger-light:#F6E4DF; --radius:22px;
   }
   *{box-sizing:border-box;}
   html,body{margin:0;padding:0;}
@@ -27,12 +33,12 @@
   .brand-sub{font-size:12.5px;color:var(--ink-soft);letter-spacing:1px;margin-top:2px;}
   .status-pill{font-size:11px;font-weight:700;padding:4px 10px;border-radius:99px;background:var(--sage-light);color:var(--pine);white-space:nowrap;}
   .status-pill.err{background:var(--danger-light);color:var(--danger);}
-  .status-pill.saving{background:#FFF1DC;color:var(--apricot-dark);}
+  .status-pill.saving{background:#DFF6FC;color:var(--apricot-dark);}
 
   .card{background:var(--white);border-radius:var(--radius);border:1px solid var(--line);box-shadow:0 10px 30px rgba(38,67,58,0.08);padding:26px 22px 24px;}
   .card-title{font-family:"Baloo 2","Noto Sans TC",sans-serif;font-weight:700;font-size:20px;color:var(--pine);margin:0 0 4px;}
   .card-desc{font-size:13px;color:var(--ink-soft);margin:0 0 16px;line-height:1.6;}
-  .admin-note{background:#FFF6EA;border:1px solid #F0D6AF;color:var(--apricot-dark);font-size:12px;border-radius:10px;padding:10px 12px;margin-bottom:18px;line-height:1.6;}
+  .admin-note{background:#E5F8FD;border:1px solid #A9CDE8;color:var(--apricot-dark);font-size:12px;border-radius:10px;padding:10px 12px;margin-bottom:18px;line-height:1.6;}
 
   .cal-head{display:flex;align-items:center;justify-content:space-between;margin-bottom:12px;}
   .cal-head .mo{font-family:"Baloo 2","Noto Sans TC",sans-serif;font-weight:700;font-size:16px;color:var(--pine);}
@@ -42,24 +48,25 @@
   .cal-cell{
     aspect-ratio:1/1;display:flex;flex-direction:column;align-items:center;justify-content:center;
     border-radius:10px;font-size:13.5px;font-weight:600;cursor:pointer;border:1.5px solid transparent;
-    color:var(--ink);background:var(--cream);gap:1px;position:relative;
+    color:var(--ink);background:transparent;gap:1px;position:relative;
   }
   .cal-cell.empty{visibility:hidden;cursor:default;}
+  .cal-cell.avail{background:#FFFFFF;border-color:var(--line);box-shadow:0 1px 3px rgba(26,58,86,0.06);}
   .cal-cell.avail:hover{border-color:var(--sage);}
-  .cal-cell.selected{background:var(--apricot);color:#fff;}
+  .cal-cell.selected{background:var(--apricot);border-color:var(--apricot);color:#fff;}
   .cal-cell.today{box-shadow:inset 0 0 0 1.5px var(--pine);}
-  .cal-cell.admin-closed{background:var(--danger-light);color:var(--danger);}
-  .cal-cell.admin-past{color:#C9C0AC;background:#F1ECE0;cursor:not-allowed;}
-  .cal-cell.extended{background:#FFF1DC;box-shadow:inset 0 0 0 1.5px var(--apricot);color:var(--apricot-dark);}
+  .cal-cell.admin-closed{background:var(--danger-light);border-color:var(--danger);color:var(--danger);}
+  .cal-cell.admin-past{color:#B7C4D6;background:transparent;cursor:not-allowed;}
+  .cal-cell.extended{background:#DFF6FC;border-color:var(--apricot);box-shadow:inset 0 0 0 1.5px var(--apricot);color:var(--apricot-dark);}
   .cal-tag{font-size:8.5px;font-weight:700;line-height:1;background:var(--pine);color:#fff;padding:1.5px 4px;border-radius:5px;letter-spacing:0.5px;}
   .cal-cell.selected .cal-tag{background:#fff;color:var(--pine);}
   .cal-legend{display:flex;gap:16px;font-size:11.5px;color:var(--ink-soft);margin:6px 0 18px;flex-wrap:wrap;}
   .cal-legend span{display:inline-flex;align-items:center;gap:5px;}
   .dot{width:9px;height:9px;border-radius:50%;display:inline-block;}
-  .dot.a{background:var(--cream);border:1.5px solid var(--sage);}
-  .dot.d{background:#F1ECE0;border:1.5px solid #C9C0AC;}
+  .dot.a{background:#FFFFFF;border:1.5px solid var(--line);}
+  .dot.d{background:transparent;border:1.5px dashed #B7C4D6;}
   .dot.c{background:var(--danger-light);border:1.5px solid var(--danger);}
-  .dot.e{background:#FFF1DC;border:1.5px solid var(--apricot);}
+  .dot.e{background:#DFF6FC;border:1.5px solid var(--apricot);}
 
   .toggle-row{display:flex;align-items:center;justify-content:space-between;background:var(--cream);border-radius:12px;padding:12px 14px;margin-bottom:16px;}
   .toggle-row .label{font-size:13.5px;font-weight:700;color:var(--pine);}
@@ -106,7 +113,9 @@
   .btn{flex:1;padding:12px 18px;border-radius:12px;border:none;font-family:inherit;font-weight:700;font-size:14px;cursor:pointer;}
   .btn-primary{background:var(--apricot);color:#fff;}
   .btn-primary:hover{background:var(--apricot-dark);}
-  .btn-primary:disabled{background:#E8D9C4;color:#fff;cursor:not-allowed;}
+  .btn-tab-color{background:var(--pine)!important;}
+  .btn-tab-color:hover{filter:brightness(0.92);}
+  .btn-primary:disabled{background:#D8E2F0;color:#fff;cursor:not-allowed;}
   .err{color:var(--danger);font-size:12px;margin-top:5px;}
 
   .info-card{background:var(--sage-light);border-radius:14px;padding:16px;margin:16px 0;}
@@ -117,6 +126,17 @@
   .diary-entry{background:var(--cream);border-radius:12px;padding:14px;margin-bottom:10px;}
   .diary-entry .date{font-size:11.5px;color:var(--ink-soft);margin-bottom:6px;}
   .diary-entry .note{font-size:13.5px;white-space:pre-wrap;line-height:1.6;}
+
+  .install-banner{
+    background:var(--pine);color:#fff;border-radius:14px;
+    display:flex;align-items:center;justify-content:space-between;gap:10px;
+    padding:10px 14px;font-size:12.5px;margin-bottom:16px;line-height:1.5;
+  }
+  .install-banner b{font-weight:800;}
+  .install-banner .btns{display:flex;gap:8px;flex-shrink:0;}
+  .install-banner button{border:none;border-radius:8px;padding:7px 12px;font-weight:700;cursor:pointer;font-family:inherit;font-size:12px;}
+  .install-banner .install-go{background:#fff;color:var(--pine);}
+  .install-banner .install-close{background:rgba(255,255,255,0.25);color:#fff;padding:7px 10px;}
 
   @media (max-width:420px){
     .admin-slot-grid{grid-template-columns:repeat(2,1fr);}
@@ -251,7 +271,7 @@ function tplDiary(){
       <input type="text" id="diary-search-value" placeholder="請輸入${fieldLabel}（可只輸入部分內容）" value="${esc(diaryState.value)}">
     </div>
     <div class="err" id="diary-err" style="display:${diaryState.error?'block':'none'};">${diaryState.error||''}</div>
-    <div class="actions"><button class="btn btn-primary" id="diarySearchBtn" style="flex:1;">查詢</button></div>
+    <div class="actions"><button class="btn btn-primary btn-tab-color" id="diarySearchBtn" style="flex:1;">查詢</button></div>
 
     ${diaryState.results.length>1 ? `
       <div class="summary-box">
@@ -514,6 +534,44 @@ function bindAdmin(){
 }
 
 loadSettings();
+
+if('serviceWorker' in navigator){
+  window.addEventListener('load', ()=>{ navigator.serviceWorker.register('sw.js').catch(()=>{}); });
+}
+
+/* ================= 加入主畫面提示條 ================= */
+let deferredInstallPrompt = null;
+function isIOS(){ return /iphone|ipad|ipod/i.test(navigator.userAgent) && !window.MSStream; }
+function isStandalone(){ return window.matchMedia('(display-mode: standalone)').matches || window.navigator.standalone === true; }
+function showInstallBanner(mode){
+  if(isStandalone() || document.getElementById('installBanner')) return;
+  const wrap = document.querySelector('.wrap');
+  const banner = document.createElement('div');
+  banner.id = 'installBanner';
+  banner.className = 'install-banner';
+  if(mode==='android'){
+    banner.innerHTML = `<span>加入主畫面，像 App 一樣使用</span><span class="btns"><button class="install-go" id="installGoBtn">安裝</button><button class="install-close" id="installCloseBtn">✕</button></span>`;
+  } else {
+    banner.innerHTML = `<span>iPhone 用戶：點下方 <b>分享</b> 圖示 → <b>加入主畫面</b></span><span class="btns"><button class="install-close" id="installCloseBtn">✕</button></span>`;
+  }
+  wrap.insertBefore(banner, wrap.firstChild);
+  document.getElementById('installCloseBtn').addEventListener('click', ()=>banner.remove());
+  const goBtn = document.getElementById('installGoBtn');
+  if(goBtn){
+    goBtn.addEventListener('click', async ()=>{
+      banner.remove();
+      if(deferredInstallPrompt){ deferredInstallPrompt.prompt(); await deferredInstallPrompt.userChoice; deferredInstallPrompt = null; }
+    });
+  }
+}
+window.addEventListener('beforeinstallprompt', (e)=>{
+  e.preventDefault();
+  deferredInstallPrompt = e;
+  showInstallBanner('android');
+});
+window.addEventListener('load', ()=>{
+  if(!isStandalone() && isIOS()){ setTimeout(()=>showInstallBanner('ios'), 1000); }
+});
 </script>
 </body>
 </html>
