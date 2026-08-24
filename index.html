@@ -778,7 +778,6 @@ function tplSuccess(){
       <h2>預約已送出</h2>
       <div class="pending-badge">⏳ 需等托比確認</div>
       <p>已為 ${esc(o.petName)} 送出 ${b.date} ${b.time} 的${state.service.label}預約，<br>托比確認後會透過您留下的聯絡方式通知您。</p>
-      <div class="conf-code">${state.confirmCode || ''}</div>
       ${state.customerCode ? `
       <div class="code-box">
         <div class="lbl">您的專屬代碼</div>
