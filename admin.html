@@ -91,9 +91,10 @@
   .summary-item .x{color:var(--danger);cursor:pointer;font-weight:700;font-size:13px;background:none;border:none;padding:2px 6px;}
   .summary-empty{font-size:12px;color:var(--ink-soft);padding:6px 0;}
 
-  .view-tabs{display:flex;border:1.5px solid var(--line);border-radius:11px;overflow:hidden;margin-bottom:20px;}
-  .view-tabs button{flex:1;padding:11px 8px;border:none;background:var(--cream);font-family:inherit;font-size:13.5px;font-weight:700;color:var(--ink-soft);cursor:pointer;}
-  .view-tabs button+button{border-left:1.5px solid var(--line);}
+  .view-tabs{display:flex;flex-wrap:wrap;border:1.5px solid var(--line);border-radius:11px;overflow:hidden;margin-bottom:20px;}
+  .view-tabs button{flex:1 1 50%;padding:11px 6px;border:none;background:var(--cream);font-family:inherit;font-size:12.5px;font-weight:700;color:var(--ink-soft);cursor:pointer;border-bottom:1.5px solid var(--line);}
+  .view-tabs button:nth-child(odd){border-right:1.5px solid var(--line);}
+  .view-tabs button:nth-child(n+3){border-bottom:none;}
   .view-tabs button.active{background:var(--pine);color:#fff;}
 
   .field{margin-bottom:16px;}
@@ -123,6 +124,15 @@
   .info-line{display:flex;justify-content:space-between;font-size:13.5px;padding:5px 0;}
   .info-line .k{color:var(--ink-soft);}
   .info-line .v{font-weight:600;}
+  .svc-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:18px;}
+  .svc-card{border:1.5px solid var(--line);border-radius:14px;padding:14px;cursor:pointer;background:var(--cream);text-align:left;}
+  .svc-card.active{border-color:var(--apricot);background:#E5F8FD;box-shadow:0 0 0 3px rgba(41,182,232,0.15);}
+  .svc-name{font-weight:700;font-size:14.5px;color:var(--pine);}
+  .svc-sub{font-size:11.5px;color:var(--ink-soft);margin-top:3px;}
+  .choice-row{display:flex;gap:10px;margin-bottom:16px;}
+  .choice-pill{flex:1;padding:11px;border-radius:12px;text-align:center;border:1.5px solid var(--line);background:var(--cream);font-weight:600;font-size:13.5px;color:var(--ink-soft);cursor:pointer;}
+  .choice-pill.active{background:var(--pine);border-color:var(--pine);color:#fff;}
+  .admin-slot.selected-slot{background:var(--pine);border-color:var(--pine);color:#fff;}
   .diary-entry{background:var(--cream);border-radius:12px;padding:14px;margin-bottom:10px;}
   .diary-entry .date{font-size:11.5px;color:var(--ink-soft);margin-bottom:6px;}
   .diary-entry .note{font-size:13.5px;white-space:pre-wrap;line-height:1.6;}
@@ -174,17 +184,42 @@ const adminConfig = { closedDates:new Set(), blockedSlots:{}, extendedDates:new 
 const adminView = { year:new Date().getFullYear(), month:new Date().getMonth(), selectedDate:null };
 const BUSINESS_START = 9*60, DEFAULT_BUSINESS_END = 13*60, EXTENDED_BUSINESS_END = 20*60;
 
-const pageState = { view:'calendar' }; // 'calendar' | 'diary'
+const pageState = { view:'calendar' }; // 'calendar' | 'diary' | 'newCustomer' | 'newBooking'
 const diaryState = { field:'name', value:'', results:[], customer:null, entries:[], error:'' };
 const DIARY_FIELDS = { name:'飼主姓名', phone:'電話', line:'LINE ID', pet:'寵物名稱' };
 function esc(str){ return String(str==null?'':str).replace(/[&<>"']/g, m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m])); }
 
 function fmtDate(d){ return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0'); }
 function fmtTime(mins){ const h=Math.floor(mins/60), m=mins%60; return String(h).padStart(2,'0')+':'+String(m).padStart(2,'0'); }
+function toMin(hhmm){ const [h,m] = hhmm.split(':').map(Number); return h*60+m; }
 function isPastDate(dt){ const today=new Date(); today.setHours(0,0,0,0); return dt < today; }
 function isDateFullyClosed(dateStr){ return adminConfig.closedDates.has(dateStr); }
 function getBusinessEnd(dateStr){ return adminConfig.extendedDates.has(dateStr) ? EXTENDED_BUSINESS_END : DEFAULT_BUSINESS_END; }
 function baseSlots(endMin){ endMin = endMin || DEFAULT_BUSINESS_END; const arr=[]; for(let t=BUSINESS_START;t<endMin;t+=30) arr.push(t); return arr; }
+function isSlotBlockedForBooking(dateStr, startMin, durationMin){
+  if(isDateFullyClosed(dateStr)) return true;
+  const blocked = adminConfig.blockedSlots[dateStr];
+  if(!blocked || blocked.size===0) return false;
+  for(let t=startMin; t<startMin+durationMin; t+=30){ if(blocked.has(fmtTime(t))) return true; }
+  return false;
+}
+
+const SERVICE_DEF = {
+  grooming: { name:'美容', rules:{ cat:{duration:120,label:'貓咪美容'}, dogLong:{duration:120,label:'長毛狗美容'}, dogShort:{duration:120,label:'短毛狗美容'} } },
+  bath: { name:'洗澡', rules:{ cat:{duration:120,label:'貓咪洗澡'}, dogLong:{duration:90,label:'長毛狗洗澡'}, dogShort:{duration:60,label:'短毛狗洗澡'} } }
+};
+
+const newCustomerState = {
+  data:{ ownerName:'',phone:'',lineId:'',address:'',petName:'',petBreed:'',petAge:'',petWeight:'',petPersonality:'',petHealth:'' },
+  resultCode:null, error:''
+};
+
+const newBookingState = {
+  field:'name', value:'', results:[], customer:null, error:'',
+  service:{ category:'', animalType:'', hairLength:'', duration:0, label:'' },
+  date:null, time:null,
+  monthView:{ year:new Date().getFullYear(), month:new Date().getMonth() }
+};
 
 function setStatus(mode){
   const pill = document.getElementById('statusPill');
@@ -240,14 +275,25 @@ function render(){
     <div class="view-tabs" id="view-tabs">
       <button type="button" data-v="calendar" class="${pageState.view==='calendar'?'active':''}">預約時間管理</button>
       <button type="button" data-v="diary" class="${pageState.view==='diary'?'active':''}">寵物日記</button>
+      <button type="button" data-v="newCustomer" class="${pageState.view==='newCustomer'?'active':''}">新增客人</button>
+      <button type="button" data-v="newBooking" class="${pageState.view==='newBooking'?'active':''}">新增預約</button>
     </div>
   `;
-  document.getElementById('card').innerHTML = tabs + (pageState.view==='diary' ? tplDiary() : tplAdmin());
+  let bodyHtml;
+  if(pageState.view==='diary') bodyHtml = tplDiary();
+  else if(pageState.view==='newCustomer') bodyHtml = tplNewCustomer();
+  else if(pageState.view==='newBooking') bodyHtml = tplNewBooking();
+  else bodyHtml = tplAdmin();
+
+  document.getElementById('card').innerHTML = tabs + bodyHtml;
   document.getElementById('view-tabs').addEventListener('click', e=>{
     const btn = e.target.closest('button'); if(!btn) return;
     pageState.view = btn.dataset.v; render();
   });
-  if(pageState.view==='diary') bindDiary(); else bindAdmin();
+  if(pageState.view==='diary') bindDiary();
+  else if(pageState.view==='newCustomer') bindNewCustomer();
+  else if(pageState.view==='newBooking') bindNewBooking();
+  else bindAdmin();
 }
 
 /* ================= 寵物日記 ================= */
@@ -378,6 +424,356 @@ function bindDiary(){
   });
   const addBtn = document.getElementById('diaryAddBtn');
   if(addBtn) addBtn.addEventListener('click', addDiaryEntry);
+}
+
+/* ================= 新增客人 ================= */
+function tplNewCustomer(){
+  const d = newCustomerState.data;
+  return `
+    <h2 class="card-title">新增客人資料</h2>
+    <p class="card-desc">直接在後台幫客人建檔，系統會自動產生一組專屬代碼；下次客人自己預約時輸入這組代碼，就能快速帶入資料。</p>
+    <div class="field"><label>飼主姓名</label><input type="text" id="nc-name" value="${esc(d.ownerName)}"></div>
+    <div class="field"><label>電話</label><input type="tel" id="nc-phone" value="${esc(d.phone)}"></div>
+    <div class="field"><label>LINE ID（選填）</label><input type="text" id="nc-line" value="${esc(d.lineId)}"></div>
+    <div class="field"><label>地址</label><input type="text" id="nc-address" value="${esc(d.address)}"></div>
+    <div class="field"><label>寵物名稱</label><input type="text" id="nc-petname" value="${esc(d.petName)}"></div>
+    <div class="field"><label>寵物品種</label><input type="text" id="nc-petbreed" value="${esc(d.petBreed)}"></div>
+    <div class="field"><label>年齡（選填）</label><input type="text" id="nc-petage" value="${esc(d.petAge)}"></div>
+    <div class="field"><label>體重（選填）</label><input type="text" id="nc-petweight" value="${esc(d.petWeight)}"></div>
+    <div class="field"><label>寵物個性（選填）</label><textarea id="nc-personality">${esc(d.petPersonality)}</textarea></div>
+    <div class="field"><label>健康狀況（選填）</label><textarea id="nc-health">${esc(d.petHealth)}</textarea></div>
+    <div class="err" id="nc-err" style="display:${newCustomerState.error?'block':'none'};">${newCustomerState.error||''}</div>
+    <div class="actions"><button class="btn btn-primary" id="ncSubmitBtn" style="flex:1;">新增客人資料</button></div>
+    ${newCustomerState.resultCode ? `
+      <div class="info-card">
+        <h4>建檔成功</h4>
+        <div class="info-line"><span class="k">專屬代碼</span><span class="v" style="font-size:18px;font-weight:800;color:var(--pine);">${esc(newCustomerState.resultCode)}</span></div>
+      </div>
+    ` : ''}
+  `;
+}
+function bindNewCustomer(){
+  document.getElementById('ncSubmitBtn').addEventListener('click', async ()=>{
+    const d = newCustomerState.data;
+    d.ownerName = document.getElementById('nc-name').value.trim();
+    d.phone = document.getElementById('nc-phone').value.trim();
+    d.lineId = document.getElementById('nc-line').value.trim();
+    d.address = document.getElementById('nc-address').value.trim();
+    d.petName = document.getElementById('nc-petname').value.trim();
+    d.petBreed = document.getElementById('nc-petbreed').value.trim();
+    d.petAge = document.getElementById('nc-petage').value.trim();
+    d.petWeight = document.getElementById('nc-petweight').value.trim();
+    d.petPersonality = document.getElementById('nc-personality').value.trim();
+    d.petHealth = document.getElementById('nc-health').value.trim();
+
+    if(!d.ownerName || !d.phone || !d.address || !d.petName || !d.petBreed){
+      newCustomerState.error = '請完整填寫姓名、電話、地址、寵物名稱與品種。';
+      render(); return;
+    }
+    if(!GOOGLE_SCRIPT_URL){ newCustomerState.error = '尚未連結試算表，無法新增。'; render(); return; }
+    newCustomerState.error = '';
+    const btn = document.getElementById('ncSubmitBtn');
+    btn.disabled = true; btn.textContent = '新增中...';
+    try{
+      const res = await fetch(GOOGLE_SCRIPT_URL, {
+        method:'POST', headers:{ 'Content-Type':'text/plain;charset=utf-8' },
+        body: JSON.stringify(Object.assign({ action:'addCustomer' }, d))
+      });
+      const result = await res.json();
+      if(!result.success) throw new Error(result.error || '新增失敗');
+      newCustomerState.resultCode = result.customerCode;
+      newCustomerState.data = { ownerName:'',phone:'',lineId:'',address:'',petName:'',petBreed:'',petAge:'',petWeight:'',petPersonality:'',petHealth:'' };
+      render();
+    }catch(err){
+      btn.disabled = false; btn.textContent = '新增客人資料';
+      newCustomerState.error = '新增失敗，請確認網路連線後再試一次。';
+      render();
+      console.error('新增客人失敗：', err);
+    }
+  });
+}
+
+/* ================= 新增預約（後台手動建立） ================= */
+function computeDurationNB(){
+  const s = newBookingState.service;
+  if(!s.category || !s.animalType) return null;
+  if(s.animalType==='cat') return SERVICE_DEF[s.category].rules.cat;
+  if(s.animalType==='dog'){ if(!s.hairLength) return null; return s.hairLength==='long' ? SERVICE_DEF[s.category].rules.dogLong : SERVICE_DEF[s.category].rules.dogShort; }
+  return null;
+}
+function updateNBDuration(){
+  const r = computeDurationNB();
+  if(r){
+    newBookingState.service.duration = r.duration;
+    newBookingState.service.label = r.label + '（' + SERVICE_DEF[newBookingState.service.category].name + '）';
+  } else { newBookingState.service.duration = 0; newBookingState.service.label = ''; }
+}
+function tplNewBooking(){
+  const nb = newBookingState;
+  if(!nb.customer){
+    return `
+      <h2 class="card-title">新增預約</h2>
+      <p class="card-desc">先查詢客人（例如電話預約進來的客人），找到後再選擇服務與時段。若客人尚未建檔，請先到「新增客人」分頁建檔。</p>
+      <div class="field">
+        <label>查詢方式</label>
+        <select id="nb-field-select">
+          <option value="name" ${nb.field==='name'?'selected':''}>飼主姓名</option>
+          <option value="phone" ${nb.field==='phone'?'selected':''}>電話</option>
+          <option value="line" ${nb.field==='line'?'selected':''}>LINE ID</option>
+          <option value="pet" ${nb.field==='pet'?'selected':''}>寵物名稱</option>
+        </select>
+      </div>
+      <div class="field"><label>輸入${DIARY_FIELDS[nb.field]}</label><input type="text" id="nb-search-value" value="${esc(nb.value)}"></div>
+      <div class="err" id="nb-err" style="display:${nb.error?'block':'none'};">${nb.error||''}</div>
+      <div class="actions"><button class="btn btn-primary" id="nbSearchBtn" style="flex:1;">查詢客人</button></div>
+      ${nb.results.length>1 ? `
+        <div class="summary-box">
+          <h5>找到 ${nb.results.length} 筆，請選擇</h5>
+          ${nb.results.map((r,i)=>`
+            <div class="summary-item" data-pick="${i}" style="cursor:pointer;">
+              <span>${esc(r.ownerName)}｜${esc(r.phone)}｜${esc(r.petName)}</span>
+              <span style="color:var(--pine);font-weight:700;">選擇 ›</span>
+            </div>
+          `).join('')}
+        </div>
+      ` : ''}
+    `;
+  }
+
+  const c = nb.customer, s = nb.service;
+  const showDogHair = s.animalType==='dog';
+  const dur = computeDurationNB();
+  const ready = !!dur;
+  let calendarBlock = '';
+  if(ready){
+    calendarBlock = `
+      <div class="cal-head">
+        <button class="cal-nav" id="nb-cal-prev">‹ 上個月</button>
+        <div class="mo">${nb.monthView.year} 年 ${nb.monthView.month+1} 月</div>
+        <button class="cal-nav" id="nb-cal-next">下個月 ›</button>
+      </div>
+      <div class="cal-grid" id="nb-cal-grid">${renderNBCalGrid()}</div>
+      <div id="nb-slot-section">${renderNBSlotSection()}</div>
+    `;
+  }
+  return `
+    <h2 class="card-title">新增預約</h2>
+    <div class="info-card">
+      <h4>預約客人</h4>
+      <div class="info-line"><span class="k">飼主</span><span class="v">${esc(c.ownerName)}</span></div>
+      <div class="info-line"><span class="k">電話</span><span class="v">${esc(c.phone)}</span></div>
+      <div class="info-line"><span class="k">寵物</span><span class="v">${esc(c.petName)}（${esc(c.petBreed)}）</span></div>
+    </div>
+    <button class="btn btn-ghost" id="nbChangeCustomer" style="width:100%;margin-bottom:18px;">換一位客人</button>
+
+    <div class="svc-grid" id="nb-svc-grid">
+      <div class="svc-card ${s.category==='grooming'?'active':''}" data-svc="grooming"><div class="svc-name">美容</div><div class="svc-sub">貓／狗均約 2 小時</div></div>
+      <div class="svc-card ${s.category==='bath'?'active':''}" data-svc="bath"><div class="svc-name">洗澡</div><div class="svc-sub">依貓／狗與毛長，時間不同</div></div>
+    </div>
+    <div class="field">
+      <label>寵物類別</label>
+      <div class="choice-row" id="nb-animal-row">
+        <div class="choice-pill ${s.animalType==='cat'?'active':''}" data-a="cat">貓咪</div>
+        <div class="choice-pill ${s.animalType==='dog'?'active':''}" data-a="dog">狗狗</div>
+      </div>
+    </div>
+    ${showDogHair ? `
+    <div class="field">
+      <label>毛長類型</label>
+      <div class="choice-row" id="nb-hair-row">
+        <div class="choice-pill ${s.hairLength==='long'?'active':''}" data-h="long">長毛</div>
+        <div class="choice-pill ${s.hairLength==='short'?'active':''}" data-h="short">短毛</div>
+      </div>
+    </div>` : ''}
+    ${ready ? calendarBlock : `<div class="empty-note">請先選擇服務與寵物類型，即可查看可預約時段。</div>`}
+    <div class="err" id="nb-err2" style="display:none;"></div>
+    <div class="actions"><button class="btn btn-primary" id="nbSubmitBtn" ${(!nb.date||!nb.time)?'disabled':''} style="flex:1;">新增預約</button></div>
+  `;
+}
+function renderNBCalGrid(){
+  const {year, month} = newBookingState.monthView;
+  const first = new Date(year, month, 1);
+  const startOffset = first.getDay();
+  const daysInMonth = new Date(year, month+1, 0).getDate();
+  const today = new Date(); today.setHours(0,0,0,0);
+  let html = ['日','一','二','三','四','五','六'].map(d=>`<div class="cal-dow">${d}</div>`).join('');
+  for(let i=0;i<startOffset;i++) html += `<div class="cal-cell empty"></div>`;
+  for(let d=1; d<=daysInMonth; d++){
+    const dt = new Date(year, month, d);
+    const dateStr = fmtDate(dt);
+    const past = isPastDate(dt);
+    const closed = isDateFullyClosed(dateStr);
+    const extended = adminConfig.extendedDates.has(dateStr);
+    const taichung = adminConfig.taichungDates.has(dateStr);
+    const disabled = past || closed;
+    const isToday = fmtDate(dt) === fmtDate(today);
+    const isSelected = newBookingState.date === dateStr;
+    let cls = 'cal-cell';
+    cls += disabled ? ' disabled' : ' avail';
+    if(!disabled && extended) cls += ' extended';
+    if(isToday) cls += ' today';
+    if(isSelected) cls += ' selected';
+    const tag = taichung ? `<span class="cal-tag">台中</span>` : '';
+    html += `<div class="${cls}" data-date="${disabled?'':dateStr}"><span>${d}</span>${tag}</div>`;
+  }
+  return html;
+}
+function renderNBSlotSection(){
+  if(!newBookingState.date){ return `<div class="empty-note">請先選擇日期。</div>`; }
+  const duration = newBookingState.service.duration || 120;
+  const end = getBusinessEnd(newBookingState.date);
+  const slots = [];
+  for(let start=BUSINESS_START; start+duration<=end; start+=30){ slots.push({ start, taken: isSlotBlockedForBooking(newBookingState.date, start, duration) }); }
+  if(slots.length===0){ return `<div class="empty-note">此服務所需時間較長，當日時段不足，請選擇其他日期。</div>`; }
+  return `
+    <div class="slot-title">${newBookingState.date} 可預約時段</div>
+    <div class="admin-slot-grid" id="nb-slot-grid">
+      ${slots.map(s=>{
+        const val = fmtTime(s.start);
+        const isSel = newBookingState.time === val;
+        let cls = 'admin-slot';
+        if(s.taken) cls += ' blocked'; else if(isSel) cls += ' selected-slot';
+        return `<div class="${cls}" data-time="${s.taken?'':val}">${val}${s.taken?'（已被預約）':''}</div>`;
+      }).join('')}
+    </div>
+  `;
+}
+function bindNewBooking(){
+  if(!newBookingState.customer){
+    document.getElementById('nb-field-select').addEventListener('change', e=>{ newBookingState.field = e.target.value; render(); });
+    document.getElementById('nbSearchBtn').addEventListener('click', searchNBCustomer);
+    document.getElementById('nb-search-value').addEventListener('keydown', e=>{ if(e.key==='Enter') searchNBCustomer(); });
+    document.querySelectorAll('[data-pick]').forEach(el=>{
+      el.addEventListener('click', ()=>{ selectNBCustomer(newBookingState.results[parseInt(el.dataset.pick,10)]); });
+    });
+    return;
+  }
+  document.getElementById('nbChangeCustomer').addEventListener('click', ()=>{
+    newBookingState.customer = null; newBookingState.results = []; newBookingState.value = '';
+    newBookingState.date = null; newBookingState.time = null;
+    newBookingState.service = { category:'', animalType:'', hairLength:'', duration:0, label:'' };
+    render();
+  });
+  document.getElementById('nb-svc-grid').addEventListener('click', e=>{
+    const c = e.target.closest('.svc-card'); if(!c) return;
+    newBookingState.service.category = c.dataset.svc; updateNBDuration();
+    newBookingState.date = null; newBookingState.time = null;
+    render();
+  });
+  document.getElementById('nb-animal-row').addEventListener('click', e=>{
+    const p = e.target.closest('.choice-pill'); if(!p) return;
+    newBookingState.service.animalType = p.dataset.a;
+    if(p.dataset.a==='cat') newBookingState.service.hairLength = '';
+    updateNBDuration();
+    newBookingState.date = null; newBookingState.time = null;
+    render();
+  });
+  const hairRow = document.getElementById('nb-hair-row');
+  if(hairRow){
+    hairRow.addEventListener('click', e=>{
+      const p = e.target.closest('.choice-pill'); if(!p) return;
+      newBookingState.service.hairLength = p.dataset.h; updateNBDuration();
+      newBookingState.date = null; newBookingState.time = null;
+      render();
+    });
+  }
+  const calPrev = document.getElementById('nb-cal-prev');
+  if(calPrev) calPrev.addEventListener('click', ()=>{
+    newBookingState.monthView.month--; if(newBookingState.monthView.month<0){newBookingState.monthView.month=11; newBookingState.monthView.year--;}
+    newBookingState.date=null; newBookingState.time=null; render();
+  });
+  const calNext = document.getElementById('nb-cal-next');
+  if(calNext) calNext.addEventListener('click', ()=>{
+    newBookingState.monthView.month++; if(newBookingState.monthView.month>11){newBookingState.monthView.month=0; newBookingState.monthView.year++;}
+    newBookingState.date=null; newBookingState.time=null; render();
+  });
+  const calGrid = document.getElementById('nb-cal-grid');
+  if(calGrid){
+    calGrid.addEventListener('click', e=>{
+      const c = e.target.closest('.cal-cell.avail'); if(!c) return;
+      newBookingState.date = c.dataset.date; newBookingState.time = null;
+      render();
+    });
+  }
+  const slotGrid = document.getElementById('nb-slot-grid');
+  if(slotGrid){
+    slotGrid.addEventListener('click', e=>{
+      const s = e.target.closest('.admin-slot'); if(!s || s.classList.contains('blocked')) return;
+      newBookingState.time = s.dataset.time;
+      render();
+    });
+  }
+  const submitBtn = document.getElementById('nbSubmitBtn');
+  if(submitBtn) submitBtn.addEventListener('click', submitNBBooking);
+}
+async function searchNBCustomer(){
+  const value = document.getElementById('nb-search-value').value.trim();
+  newBookingState.error = ''; newBookingState.results = [];
+  if(!value){ newBookingState.error = '請輸入查詢內容。'; render(); return; }
+  newBookingState.value = value;
+  if(!GOOGLE_SCRIPT_URL){ newBookingState.error = '尚未連結試算表，無法查詢。'; render(); return; }
+  const btn = document.getElementById('nbSearchBtn');
+  btn.disabled = true; btn.textContent = '查詢中...';
+  try{
+    const res = await fetch(GOOGLE_SCRIPT_URL + '?action=searchDiaryCustomer&field=' + newBookingState.field + '&value=' + encodeURIComponent(value));
+    const data = await res.json();
+    if(!data.success) throw new Error(data.error || '查詢失敗');
+    const results = data.results || [];
+    if(results.length === 0){ newBookingState.error = '查無符合的客人，請確認輸入內容，或先到「新增客人」分頁建檔。'; }
+    else if(results.length === 1){ selectNBCustomer(results[0]); return; }
+    else { newBookingState.results = results; }
+  }catch(err){
+    newBookingState.error = '查詢失敗，請確認網路連線後再試一次。';
+    console.error('查詢客人失敗：', err);
+  }
+  btn.disabled = false; btn.textContent = '查詢客人';
+  render();
+}
+function selectNBCustomer(customer){
+  newBookingState.customer = customer;
+  newBookingState.results = [];
+  newBookingState.error = '';
+  render();
+}
+function genBookingCode(){
+  const chars = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789';
+  let out = 'PB-'; for(let i=0;i<6;i++) out += chars[Math.floor(Math.random()*chars.length)];
+  return out;
+}
+async function submitNBBooking(){
+  const btn = document.getElementById('nbSubmitBtn');
+  const errEl = document.getElementById('nb-err2');
+  errEl.style.display = 'none';
+  if(!newBookingState.date || !newBookingState.time) return;
+  const c = newBookingState.customer, s = newBookingState.service, nb = newBookingState;
+  const code = genBookingCode();
+  const payload = {
+    action:'booking', createdByAdmin:true,
+    confirmCode: code, ownerName:c.ownerName, phone:c.phone, lineId:c.lineId, address:c.address,
+    petName:c.petName, petBreed:c.petBreed, petAge:c.petAge, petWeight:c.petWeight,
+    petPersonality:c.petPersonality, petHealth:c.petHealth,
+    serviceLabel:s.label, durationMinutes:s.duration,
+    date: nb.date, time: nb.time, endTime: fmtTime(toMin(nb.time) + s.duration),
+    taichung: adminConfig.taichungDates.has(nb.date)
+  };
+  if(!GOOGLE_SCRIPT_URL){ errEl.textContent = '尚未連結試算表，無法新增。'; errEl.style.display = 'block'; return; }
+  btn.disabled = true; btn.textContent = '新增中...';
+  try{
+    const res = await fetch(GOOGLE_SCRIPT_URL, {
+      method:'POST', headers:{ 'Content-Type':'text/plain;charset=utf-8' }, body: JSON.stringify(payload)
+    });
+    const result = await res.json();
+    if(!result.success) throw new Error(result.error || '新增失敗');
+    newBookingState.customer = null; newBookingState.results = []; newBookingState.value = '';
+    newBookingState.service = { category:'', animalType:'', hairLength:'', duration:0, label:'' };
+    newBookingState.date = null; newBookingState.time = null;
+    render();
+  }catch(err){
+    btn.disabled = false; btn.textContent = '新增預約';
+    errEl.textContent = '新增失敗，請確認網路連線後再試一次。';
+    errEl.style.display = 'block';
+    console.error('新增預約失敗：', err);
+  }
 }
 
 function tplAdmin(){
