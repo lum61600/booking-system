@@ -43,30 +43,33 @@
   .cal-head{display:flex;align-items:center;justify-content:space-between;margin-bottom:12px;}
   .cal-head .mo{font-family:"Baloo 2","Noto Sans TC",sans-serif;font-weight:700;font-size:16px;color:var(--pine);}
   .cal-nav button{height:30px;border-radius:8px;border:1.5px solid var(--line);background:var(--cream);cursor:pointer;font-size:12.5px;color:var(--pine);padding:0 10px;font-family:inherit;font-weight:600;}
-  .cal-grid{display:grid;grid-template-columns:repeat(7,1fr);gap:6px;margin-bottom:8px;}
+  .cal-grid{display:grid;grid-template-columns:repeat(7,minmax(0,1fr));gap:6px;margin-bottom:8px;}
   .cal-dow{text-align:center;font-size:11px;color:var(--ink-soft);font-weight:700;padding-bottom:4px;}
   .cal-cell{
     aspect-ratio:1/1;display:flex;flex-direction:column;align-items:center;justify-content:center;
     border-radius:10px;font-size:13.5px;font-weight:600;cursor:pointer;border:1.5px solid transparent;
     color:var(--ink);background:transparent;gap:1px;position:relative;
+    min-width:0;overflow:hidden;
   }
   .cal-cell.empty{visibility:hidden;cursor:default;}
-  .cal-cell.avail{background:#FFFFFF;border-color:var(--line);box-shadow:0 1px 3px rgba(26,58,86,0.06);}
+  .cal-cell.avail{background:#BCCCDC;border-color:#A3B6CA;box-shadow:0 1px 3px rgba(26,58,86,0.06);}
   .cal-cell.avail:hover{border-color:var(--sage);}
   .cal-cell.selected{background:var(--apricot);border-color:var(--apricot);color:#fff;}
   .cal-cell.today{box-shadow:inset 0 0 0 1.5px var(--pine);}
   .cal-cell.admin-closed{background:var(--danger-light);border-color:var(--danger);color:var(--danger);}
   .cal-cell.admin-past{color:#B7C4D6;background:transparent;cursor:not-allowed;}
-  .cal-cell.extended{background:#DFF6FC;border-color:var(--apricot);box-shadow:inset 0 0 0 1.5px var(--apricot);color:var(--apricot-dark);}
-  .cal-tag{font-size:8.5px;font-weight:700;line-height:1;background:var(--pine);color:#fff;padding:1.5px 4px;border-radius:5px;letter-spacing:0.5px;}
+  .cal-cell.extended{background:#D9EAFD;border-color:#B8D4F5;color:var(--ink);}
+  .cal-tag{font-size:8.5px;font-weight:700;line-height:1;background:var(--pine);color:#fff;padding:1.5px 4px;border-radius:5px;letter-spacing:0.5px;max-width:100%;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;box-sizing:border-box;}
   .cal-cell.selected .cal-tag{background:#fff;color:var(--pine);}
+  .taichung-dot{width:6px;height:6px;border-radius:50%;background:var(--pine);display:inline-block;flex-shrink:0;}
+  .cal-cell.selected .taichung-dot{background:#fff;}
   .cal-legend{display:flex;gap:16px;font-size:11.5px;color:var(--ink-soft);margin:6px 0 18px;flex-wrap:wrap;}
   .cal-legend span{display:inline-flex;align-items:center;gap:5px;}
   .dot{width:9px;height:9px;border-radius:50%;display:inline-block;}
-  .dot.a{background:#FFFFFF;border:1.5px solid var(--line);}
+  .dot.a{background:#BCCCDC;border:1.5px solid #A3B6CA;}
   .dot.d{background:transparent;border:1.5px dashed #B7C4D6;}
   .dot.c{background:var(--danger-light);border:1.5px solid var(--danger);}
-  .dot.e{background:#DFF6FC;border:1.5px solid var(--apricot);}
+  .dot.e{background:#D9EAFD;border:1.5px solid #B8D4F5;}
 
   .toggle-row{display:flex;align-items:center;justify-content:space-between;background:var(--cream);border-radius:12px;padding:12px 14px;margin-bottom:16px;}
   .toggle-row .label{font-size:13.5px;font-weight:700;color:var(--pine);}
@@ -82,6 +85,16 @@
   .admin-slot-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin-bottom:8px;}
   .admin-slot{padding:9px 4px;border-radius:9px;border:1.5px solid var(--line);background:var(--cream);text-align:center;font-size:12.5px;font-weight:600;color:var(--pine);cursor:pointer;}
   .admin-slot.blocked{background:var(--danger-light);border-color:var(--danger);color:var(--danger);text-decoration:line-through;}
+  .region-cell{user-select:none;-webkit-user-select:none;touch-action:none;}
+  .region-cell.region-on-tc{background:#3D6FA8;border-color:#2A5480;color:#fff;}
+  .region-cell.region-on-sb{background:#3E9B6B;border-color:#2F7A53;color:#fff;}
+  .region-cell.dragging{outline:2px dashed var(--ink);outline-offset:-2px;}
+  .region-legend{display:flex;gap:16px;font-size:11.5px;color:var(--ink-soft);margin:2px 0 10px;flex-wrap:wrap;}
+  .region-legend span{display:inline-flex;align-items:center;gap:5px;}
+  .region-dot{width:9px;height:9px;border-radius:4px;display:inline-block;}
+  .region-dot.tc{background:#3D6FA8;}
+  .region-dot.sb{background:#3E9B6B;}
+  .link-btn{background:none;border:none;color:var(--ink-soft);font-size:11.5px;text-decoration:underline;cursor:pointer;padding:0 0 16px;}
   .empty-note{font-size:13px;color:var(--ink-soft);background:var(--cream);border-radius:10px;padding:14px;text-align:${'left'};}
 
   .summary-box{background:var(--cream);border-radius:12px;padding:14px;margin-top:18px;}
@@ -180,11 +193,12 @@
    此網址同時用來讀取／儲存後台設定（與客人端 index.html 共用同一個網址）*/
 const GOOGLE_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbwfwpOEL4l_iqzXx0Ky9_J2l-HzFsHZD-nURQ8VRpGPrs_NYAN6u5RTtVE607RutPH6/exec";
 
-const adminConfig = { closedDates:new Set(), blockedSlots:{}, extendedDates:new Set(), taichungDates:new Set() };
+const adminConfig = { closedDates:new Set(), blockedSlots:{}, extendedDates:new Set(), taichungDates:new Set(), taichungRegionSlots:{} };
 const adminView = { year:new Date().getFullYear(), month:new Date().getMonth(), selectedDate:null };
 const BUSINESS_START = 9*60, DEFAULT_BUSINESS_END = 13*60, EXTENDED_BUSINESS_END = 20*60;
 
 const pageState = { view:'calendar' }; // 'calendar' | 'diary' | 'newCustomer' | 'newBooking'
+const adminAuth = { password: sessionStorage.getItem('adminAuthPassword') || '', verified:false, error:'' };
 const diaryState = { field:'name', value:'', results:[], customer:null, entries:[], error:'' };
 const DIARY_FIELDS = { name:'飼主姓名', phone:'電話', line:'LINE ID', pet:'寵物名稱' };
 function esc(str){ return String(str==null?'':str).replace(/[&<>"']/g, m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m])); }
@@ -213,14 +227,16 @@ const SERVICE_DEF = {
 const FLAT_SERVICES = ['walk','homecare']; // 這兩項不分貓狗，用「基本時間 × 倍數」計算
 
 const newCustomerState = {
-  data:{ ownerName:'',phone:'',lineId:'',address:'',petName:'',petBreed:'',petAge:'',petWeight:'',petPersonality:'',petHealth:'',remarks:'',contactPref:'' },
-  resultCode:null, lastCreated:null, error:''
+  data:{ ownerName:'',phone:'',lineId:'',address:'',remarks:'',contactPref:'' },
+  pets:[ { name:'',breed:'',age:'',weight:'',personality:'',health:'' } ],
+  resultCode:null, resultPets:null, lastCreated:null, error:''
 };
 
 const newBookingState = {
   field:'name', value:'', results:[], customer:null, error:'',
+  selectedPet:null, addPetOpen:false, newPetDraft:{ name:'',breed:'',age:'',weight:'',personality:'',health:'',photo:null },
   service:{ category:'', animalType:'', hairLength:'', multiplier:1, duration:0, label:'' },
-  date:null, time:null,
+  date:null, time:null, customTime:false, hideAreaHint:false,
   monthView:{ year:new Date().getFullYear(), month:new Date().getMonth() }
 };
 
@@ -233,6 +249,63 @@ function setStatus(mode){
   else if(mode==='loading'){ pill.textContent = '讀取設定中...'; pill.className='status-pill saving'; }
 }
 
+/* ================= 後台密碼登入 ================= */
+function renderAuthGate(){
+  document.getElementById('card').innerHTML = `
+    <h2 class="card-title">店家後台登入</h2>
+    <p class="card-desc">請輸入後台密碼才能繼續使用。</p>
+    <div class="field"><label>密碼</label><input type="password" id="auth-password" placeholder="請輸入密碼"></div>
+    <div class="err" id="auth-err" style="display:${adminAuth.error?'block':'none'};">${esc(adminAuth.error)}</div>
+    <div class="actions"><button class="btn btn-primary" id="authSubmitBtn" style="flex:1;">登入</button></div>
+  `;
+  const btn = document.getElementById('authSubmitBtn');
+  const input = document.getElementById('auth-password');
+  btn.addEventListener('click', submitAuth);
+  input.addEventListener('keydown', e=>{ if(e.key==='Enter') submitAuth(); });
+  input.focus();
+}
+async function submitAuth(){
+  const input = document.getElementById('auth-password');
+  const errEl = document.getElementById('auth-err');
+  const btn = document.getElementById('authSubmitBtn');
+  const pw = input.value;
+  if(!pw){ errEl.textContent='請輸入密碼。'; errEl.style.display='block'; return; }
+  if(!GOOGLE_SCRIPT_URL){ errEl.textContent='尚未連結試算表，無法驗證密碼。'; errEl.style.display='block'; return; }
+  errEl.style.display='none';
+  btn.disabled = true; btn.textContent = '驗證中...';
+  try{
+    const res = await fetch(GOOGLE_SCRIPT_URL + '?action=checkAdminPassword&adminPassword=' + encodeURIComponent(pw));
+    const data = await res.json();
+    if(data.success){
+      adminAuth.password = pw;
+      adminAuth.verified = true;
+      sessionStorage.setItem('adminAuthPassword', pw);
+      loadSettings();
+    } else {
+      errEl.textContent = '密碼錯誤，請再試一次。';
+      errEl.style.display = 'block';
+      btn.disabled = false; btn.textContent = '登入';
+    }
+  }catch(err){
+    console.error('驗證密碼失敗：', err);
+    errEl.textContent = '驗證失敗，請確認網路連線後再試一次。';
+    errEl.style.display = 'block';
+    btn.disabled = false; btn.textContent = '登入';
+  }
+}
+// 進站時先確認密碼：本機示範模式（沒接試算表）不需要密碼；有記住密碼的話先偷偷驗一次，驗過才載入正式內容
+async function initAdminAuth(){
+  if(!GOOGLE_SCRIPT_URL){ loadSettings(); return; }
+  if(adminAuth.password){
+    try{
+      const res = await fetch(GOOGLE_SCRIPT_URL + '?action=checkAdminPassword&adminPassword=' + encodeURIComponent(adminAuth.password));
+      const data = await res.json();
+      if(data.success){ adminAuth.verified = true; loadSettings(); return; }
+    }catch(err){ console.error('驗證密碼失敗：', err); }
+  }
+  renderAuthGate();
+}
+
 async function loadSettings(){
   if(!GOOGLE_SCRIPT_URL){ setStatus(); render(); return; }
   setStatus('loading');
@@ -243,6 +316,11 @@ async function loadSettings(){
       adminConfig.closedDates = new Set(data.settings.closedDates || []);
       adminConfig.extendedDates = new Set(data.settings.extendedDates || []);
       adminConfig.taichungDates = new Set(data.settings.taichungDates || []);
+      const trs = {};
+      Object.entries(data.settings.taichungRegionSlots || {}).forEach(([d, obj])=>{
+        trs[d] = { taichung: new Set((obj && obj.taichung) || []), shuangbei: new Set((obj && obj.shuangbei) || []) };
+      });
+      adminConfig.taichungRegionSlots = trs;
       const bs = {};
       Object.entries(data.settings.blockedSlots || {}).forEach(([d,arr])=>{ bs[d] = new Set(arr); });
       adminConfig.blockedSlots = bs;
@@ -259,12 +337,13 @@ async function saveSettings(){
     closedDates: Array.from(adminConfig.closedDates),
     extendedDates: Array.from(adminConfig.extendedDates),
     taichungDates: Array.from(adminConfig.taichungDates),
+    taichungRegionSlots: Object.fromEntries(Object.entries(adminConfig.taichungRegionSlots).map(([k,v])=>[k, { taichung: Array.from(v.taichung||[]), shuangbei: Array.from(v.shuangbei||[]) }])),
     blockedSlots: Object.fromEntries(Object.entries(adminConfig.blockedSlots).map(([k,v])=>[k, Array.from(v)]))
   };
   try{
     const res = await fetch(GOOGLE_SCRIPT_URL, {
       method:'POST', headers:{ 'Content-Type':'text/plain;charset=utf-8' },
-      body: JSON.stringify({ action:'saveSettings', settings })
+      body: JSON.stringify({ action:'saveSettings', adminPassword: adminAuth.password, settings })
     });
     const result = await res.json();
     if(!result.success) throw new Error(result.error || '儲存失敗');
@@ -275,6 +354,9 @@ async function saveSettings(){
 /* ================= render ================= */
 function render(){
   const tabs = `
+    <div style="display:flex;justify-content:flex-end;margin-bottom:8px;">
+      <button type="button" id="logoutBtn" class="link-btn" style="padding:0;">登出後台</button>
+    </div>
     <div class="view-tabs" id="view-tabs">
       <button type="button" data-v="calendar" class="${pageState.view==='calendar'?'active':''}">預約時間管理</button>
       <button type="button" data-v="diary" class="${pageState.view==='diary'?'active':''}">寵物日記</button>
@@ -289,8 +371,14 @@ function render(){
   else bodyHtml = tplAdmin();
 
   document.getElementById('card').innerHTML = tabs + bodyHtml;
+  document.getElementById('logoutBtn').addEventListener('click', ()=>{
+    adminAuth.password=''; adminAuth.verified=false;
+    sessionStorage.removeItem('adminAuthPassword');
+    renderAuthGate();
+  });
   document.getElementById('view-tabs').addEventListener('click', e=>{
     const btn = e.target.closest('button'); if(!btn) return;
+    if(!btn.dataset.v) return;
     pageState.view = btn.dataset.v; render();
   });
   if(pageState.view==='diary') bindDiary();
@@ -363,7 +451,7 @@ async function searchDiary(){
   const btn = document.getElementById('diarySearchBtn');
   btn.disabled = true; btn.textContent = '查詢中...';
   try{
-    const res = await fetch(GOOGLE_SCRIPT_URL + '?action=searchDiaryCustomer&field=' + diaryState.field + '&value=' + encodeURIComponent(value));
+    const res = await fetch(GOOGLE_SCRIPT_URL + '?action=searchDiaryCustomer&field=' + diaryState.field + '&value=' + encodeURIComponent(value) + '&adminPassword=' + encodeURIComponent(adminAuth.password));
     const data = await res.json();
     if(!data.success) throw new Error(data.error || '查詢失敗');
     const results = data.results || [];
@@ -387,7 +475,7 @@ async function selectDiaryCustomer(customer){
   diaryState.results = [];
   diaryState.error = '';
   try{
-    const diaryRes = await fetch(GOOGLE_SCRIPT_URL + '?action=getDiary&phone=' + encodeURIComponent(customer.phone));
+    const diaryRes = await fetch(GOOGLE_SCRIPT_URL + '?action=getDiary&phone=' + encodeURIComponent(customer.phone) + '&adminPassword=' + encodeURIComponent(adminAuth.password));
     const diaryData = await diaryRes.json();
     diaryState.entries = (diaryData.success && diaryData.entries) ? diaryData.entries : [];
   }catch(err){
@@ -404,7 +492,7 @@ async function addDiaryEntry(){
   try{
     const res = await fetch(GOOGLE_SCRIPT_URL, {
       method:'POST', headers:{ 'Content-Type':'text/plain;charset=utf-8' },
-      body: JSON.stringify({ action:'addDiaryEntry', phone: diaryState.customer.phone, petName: diaryState.customer.petName, note })
+      body: JSON.stringify({ action:'addDiaryEntry', adminPassword: adminAuth.password, phone: diaryState.customer.phone, petName: diaryState.customer.petName, note })
     });
     const result = await res.json();
     if(!result.success) throw new Error(result.error || '新增失敗');
@@ -432,9 +520,18 @@ function bindDiary(){
 /* ================= 新增客人 ================= */
 function tplNewCustomer(){
   const d = newCustomerState.data;
+  const petBlocks = newCustomerState.pets.map((p,i)=>`
+    <div class="slot-title" style="margin-top:18px;">${newCustomerState.pets.length>1 ? `寵物 #${i+1}` : '寵物'}${newCustomerState.pets.length>1?` <button type="button" class="link-btn" data-remove-nc-pet="${i}" style="float:right;padding:0;">移除這隻</button>`:''}</div>
+    <div class="field"><label>寵物名稱</label><input type="text" class="nc-petname" data-i="${i}" value="${esc(p.name)}"></div>
+    <div class="field"><label>寵物品種</label><input type="text" class="nc-petbreed" data-i="${i}" value="${esc(p.breed)}"></div>
+    <div class="field"><label>年齡</label><input type="text" class="nc-petage" data-i="${i}" value="${esc(p.age)}"></div>
+    <div class="field"><label>體重</label><input type="text" class="nc-petweight" data-i="${i}" value="${esc(p.weight)}"></div>
+    <div class="field"><label>寵物個性</label><textarea class="nc-personality" data-i="${i}">${esc(p.personality)}</textarea></div>
+    <div class="field"><label>健康狀況</label><textarea class="nc-health" data-i="${i}">${esc(p.health)}</textarea></div>
+  `).join('');
   return `
     <h2 class="card-title">新增客人資料</h2>
-    <p class="card-desc">直接在後台幫客人建檔，系統會自動產生一組專屬代碼；下次客人自己預約時輸入這組代碼，就能快速帶入資料。以下欄位皆為選填，填多少算多少。</p>
+    <p class="card-desc">直接在後台幫客人建檔，系統會自動產生一組專屬代碼；下次客人自己預約時輸入這組代碼，就能快速帶入資料。以下欄位皆為選填，填多少算多少。客人有不只一隻寵物的話，可以一次新增好幾隻。</p>
     <div class="field"><label>飼主姓名</label><input type="text" id="nc-name" value="${esc(d.ownerName)}"></div>
     <div class="field"><label>電話</label><input type="tel" id="nc-phone" value="${esc(d.phone)}"></div>
     <div class="field"><label>LINE ID</label><input type="text" id="nc-line" value="${esc(d.lineId)}"></div>
@@ -447,12 +544,8 @@ function tplNewCustomer(){
         <div class="choice-pill ${d.contactPref==='IG'?'active':''}" data-c="IG">IG</div>
       </div>
     </div>
-    <div class="field"><label>寵物名稱</label><input type="text" id="nc-petname" value="${esc(d.petName)}"></div>
-    <div class="field"><label>寵物品種</label><input type="text" id="nc-petbreed" value="${esc(d.petBreed)}"></div>
-    <div class="field"><label>年齡</label><input type="text" id="nc-petage" value="${esc(d.petAge)}"></div>
-    <div class="field"><label>體重</label><input type="text" id="nc-petweight" value="${esc(d.petWeight)}"></div>
-    <div class="field"><label>寵物個性</label><textarea id="nc-personality">${esc(d.petPersonality)}</textarea></div>
-    <div class="field"><label>健康狀況</label><textarea id="nc-health">${esc(d.petHealth)}</textarea></div>
+    ${petBlocks}
+    <button type="button" class="btn btn-ghost" id="ncAddPet" style="margin-bottom:18px;">＋ 新增另一隻寵物</button>
     <div class="field"><label>備註</label><textarea id="nc-remarks" placeholder="其他想記錄的事項">${esc(d.remarks)}</textarea></div>
     <div class="err" id="nc-err" style="display:${newCustomerState.error?'block':'none'};">${newCustomerState.error||''}</div>
     <div class="actions"><button class="btn btn-primary" id="ncSubmitBtn" style="flex:1;">新增客人資料</button></div>
@@ -471,8 +564,11 @@ function bindNewCustomer(){
     goBookingBtn.addEventListener('click', ()=>{
       newBookingState.customer = newCustomerState.lastCreated;
       newBookingState.results = []; newBookingState.value = ''; newBookingState.error = '';
+      const pets = (newCustomerState.lastCreated && newCustomerState.lastCreated.pets) || [];
+      newBookingState.selectedPet = pets.length===1 ? pets[0] : null;
+      newBookingState.addPetOpen = false;
       newBookingState.service = { category:'', animalType:'', hairLength:'', multiplier:1, duration:0, label:'' };
-      newBookingState.date = null; newBookingState.time = null;
+      newBookingState.date = null; newBookingState.time = null; newBookingState.customTime = false; newBookingState.hideAreaHint = false;
       nbTravelState.loaded = false; nbTravelState.blockedRanges = []; nbTravelState.forDate = null;
       newCustomerState.resultCode = null; newCustomerState.lastCreated = null;
       pageState.view = 'newBooking';
@@ -485,21 +581,32 @@ function bindNewCustomer(){
     newCustomerState.data.contactPref = (newCustomerState.data.contactPref===val) ? '' : val;
     render();
   });
+  document.querySelectorAll('[data-remove-nc-pet]').forEach(btn=>{
+    btn.addEventListener('click', ()=>{
+      newCustomerState.pets.splice(Number(btn.dataset.removeNcPet), 1);
+      render();
+    });
+  });
+  document.getElementById('ncAddPet').addEventListener('click', ()=>{
+    newCustomerState.pets.push({ name:'',breed:'',age:'',weight:'',personality:'',health:'' });
+    render();
+  });
   document.getElementById('ncSubmitBtn').addEventListener('click', async ()=>{
     const d = newCustomerState.data;
     d.ownerName = document.getElementById('nc-name').value.trim();
     d.phone = document.getElementById('nc-phone').value.trim();
     d.lineId = document.getElementById('nc-line').value.trim();
     d.address = document.getElementById('nc-address').value.trim();
-    d.petName = document.getElementById('nc-petname').value.trim();
-    d.petBreed = document.getElementById('nc-petbreed').value.trim();
-    d.petAge = document.getElementById('nc-petage').value.trim();
-    d.petWeight = document.getElementById('nc-petweight').value.trim();
-    d.petPersonality = document.getElementById('nc-personality').value.trim();
-    d.petHealth = document.getElementById('nc-health').value.trim();
     d.remarks = document.getElementById('nc-remarks').value.trim();
-
-    const hasAny = Object.values(d).some(v => v);
+    newCustomerState.pets.forEach((p,i)=>{
+      p.name = document.querySelector(`.nc-petname[data-i="${i}"]`).value.trim();
+      p.breed = document.querySelector(`.nc-petbreed[data-i="${i}"]`).value.trim();
+      p.age = document.querySelector(`.nc-petage[data-i="${i}"]`).value.trim();
+      p.weight = document.querySelector(`.nc-petweight[data-i="${i}"]`).value.trim();
+      p.personality = document.querySelector(`.nc-personality[data-i="${i}"]`).value.trim();
+      p.health = document.querySelector(`.nc-health[data-i="${i}"]`).value.trim();
+    });
+    const hasAny = Object.values(d).some(v => v) || newCustomerState.pets.some(p => Object.values(p).some(v=>v));
     if(!hasAny){
       newCustomerState.error = '請至少填寫一項資料。';
       render(); return;
@@ -508,20 +615,27 @@ function bindNewCustomer(){
     newCustomerState.error = '';
     const btn = document.getElementById('ncSubmitBtn');
     btn.disabled = true; btn.textContent = '新增中...';
+    // 只把「有填任何內容」的寵物送出去，避免一堆全空的寵物區塊也被存進去
+    const petsToSend = newCustomerState.pets.filter(p => Object.values(p).some(v=>v));
     try{
       const res = await fetch(GOOGLE_SCRIPT_URL, {
         method:'POST', headers:{ 'Content-Type':'text/plain;charset=utf-8' },
-        body: JSON.stringify(Object.assign({ action:'addCustomer' }, d))
+        body: JSON.stringify({
+          action:'addCustomer', ownerName:d.ownerName, phone:d.phone, lineId:d.lineId, address:d.address,
+          remarks:d.remarks, contactPref:d.contactPref,
+          pets: petsToSend.map(p=>({ petName:p.name, petBreed:p.breed, petAge:p.age, petWeight:p.weight, petPersonality:p.personality, petHealth:p.health }))
+        })
       });
       const result = await res.json();
       if(!result.success) throw new Error(result.error || '新增失敗');
       newCustomerState.resultCode = result.customerCode;
+      newCustomerState.resultPets = result.pets || [];
       newCustomerState.lastCreated = {
         ownerName: d.ownerName, phone: d.phone, lineId: d.lineId, address: d.address,
-        petName: d.petName, petBreed: d.petBreed, petAge: d.petAge, petWeight: d.petWeight,
-        petPersonality: d.petPersonality, petHealth: d.petHealth, customerCode: result.customerCode
+        customerCode: result.customerCode, pets: result.pets || []
       };
-      newCustomerState.data = { ownerName:'',phone:'',lineId:'',address:'',petName:'',petBreed:'',petAge:'',petWeight:'',petPersonality:'',petHealth:'',remarks:'',contactPref:'' };
+      newCustomerState.data = { ownerName:'',phone:'',lineId:'',address:'',remarks:'',contactPref:'' };
+      newCustomerState.pets = [{ name:'',breed:'',age:'',weight:'',personality:'',health:'' }];
       render();
     }catch(err){
       btn.disabled = false; btn.textContent = '新增客人資料';
@@ -587,6 +701,26 @@ function tplNewBooking(){
   }
 
   const c = nb.customer, s = nb.service;
+  if(!nb.selectedPet){
+    const pets = c.pets || [];
+    return `
+      <h2 class="card-title">選擇這次要預約的寵物</h2>
+      <p class="card-desc">飼主：${esc(c.ownerName)}｜${esc(c.phone)}。選一隻這次要預約服務的毛孩。</p>
+      <div class="svc-grid" id="nb-pet-select-grid">
+        ${pets.map(p=>`<div class="svc-card" data-pet-id="${esc(p.id)}"><div class="svc-name">${esc(p.name)}</div><div class="svc-sub">${esc(p.breed||'')}</div></div>`).join('')}
+        <div class="svc-card ${nb.addPetOpen?'active':''}" id="nb-pet-add-card"><div class="svc-name">＋ 新增寵物</div></div>
+      </div>
+      ${nb.addPetOpen ? `
+      <div class="addon-panel" id="nb-add-pet-panel">
+        <div class="field"><label>寵物名稱</label><input type="text" id="nbnp-name" value="${esc(nb.newPetDraft.name)}"></div>
+        <div class="field"><label>寵物品種</label><input type="text" id="nbnp-breed" value="${esc(nb.newPetDraft.breed)}"></div>
+        <div class="err" id="nbnp-err" style="display:none;"></div>
+        <div class="actions" style="margin-top:6px;"><button class="btn btn-primary" id="nbNpSubmitBtn" style="flex:1;">新增這隻寵物並選擇</button></div>
+      </div>` : ''}
+      <button class="btn btn-ghost" id="nbChangeCustomer" style="width:100%;margin-top:8px;">換一位客人</button>
+    `;
+  }
+  const p = nb.selectedPet;
   const isFlatService = FLAT_SERVICES.includes(s.category);
   const showDogHair = !isFlatService && s.animalType==='dog';
   const dur = computeDurationNB();
@@ -600,7 +734,17 @@ function tplNewBooking(){
         <button class="cal-nav" id="nb-cal-next">下個月 ›</button>
       </div>
       <div class="cal-grid" id="nb-cal-grid">${renderNBCalGrid()}</div>
-      <div id="nb-slot-section">${renderNBSlotSection()}</div>
+      <div class="toggle-row" style="margin-top:14px;">
+        <div>
+          <div class="label">自訂時間</div>
+          <div class="sub">不使用下方時段按鈕，直接手動輸入開始時間</div>
+        </div>
+        <label class="switch">
+          <input type="checkbox" id="nb-custom-time-toggle" ${nb.customTime?'checked':''}>
+          <span class="track"></span>
+        </label>
+      </div>
+      <div id="nb-slot-section">${nb.customTime ? renderNBCustomTimeSection() : renderNBSlotSection()}</div>
     `;
   }
   return `
@@ -609,7 +753,7 @@ function tplNewBooking(){
       <h4>預約客人</h4>
       <div class="info-line"><span class="k">飼主</span><span class="v">${esc(c.ownerName)}</span></div>
       <div class="info-line"><span class="k">電話</span><span class="v">${esc(c.phone)}</span></div>
-      <div class="info-line"><span class="k">寵物</span><span class="v">${esc(c.petName)}（${esc(c.petBreed)}）</span></div>
+      <div class="info-line"><span class="k">寵物</span><span class="v">${esc(p.name)}（${esc(p.breed)}）${(c.pets&&c.pets.length>1)?` <button type="button" class="link-btn" id="nbChangePet" style="padding:0;">換寵物</button>`:''}</span></div>
     </div>
     <button class="btn btn-ghost" id="nbChangeCustomer" style="width:100%;margin-bottom:18px;">換一位客人</button>
 
@@ -650,6 +794,18 @@ function tplNewBooking(){
     </div>` : ''}
     `}
     ${ready ? calendarBlock : `<div class="empty-note">請先選擇服務類型${isFlatService?'':'與寵物類型'}，即可查看可預約時段。</div>`}
+    ${ready ? `
+    <div class="toggle-row">
+      <div>
+        <div class="label">不顯示地區提示</div>
+        <div class="sub">開啟後，客人端首頁日曆不會用這筆預約的地址當作當天的地區小提示</div>
+      </div>
+      <label class="switch">
+        <input type="checkbox" id="nb-hide-area-toggle" ${nb.hideAreaHint?'checked':''}>
+        <span class="track"></span>
+      </label>
+    </div>
+    ` : ''}
     <div class="err" id="nb-err2" style="display:none;"></div>
     <div class="actions"><button class="btn btn-primary" id="nbSubmitBtn" ${(!nb.date||!nb.time)?'disabled':''} style="flex:1;">新增預約</button></div>
   `;
@@ -677,7 +833,7 @@ function renderNBCalGrid(){
     if(!disabled && extended) cls += ' extended';
     if(isToday) cls += ' today';
     if(isSelected) cls += ' selected';
-    const tag = taichung ? `<span class="cal-tag">台中</span>` : '';
+    const tag = taichung ? `<span class="taichung-dot"></span>` : '';
     html += `<div class="${cls}" data-date="${disabled?'':dateStr}"><span>${d}</span>${tag}</div>`;
   }
   return html;
@@ -732,6 +888,28 @@ function renderNBSlotSection(){
     </div>
   `;
 }
+function renderNBCustomTimeSection(){
+  if(!newBookingState.date){ return `<div class="empty-note">請先選擇日期。</div>`; }
+  const duration = newBookingState.service.duration || 120;
+  const nb = newBookingState;
+  let warning = '';
+  if(nb.time){
+    const startMin = toMin(nb.time);
+    const isLoaded = nbTravelState.forDate === nb.date && nbTravelState.loaded;
+    const conflict = isSlotBlockedForBooking(nb.date, startMin, duration) || (isLoaded && isSlotBlockedByTravelNB(startMin, duration));
+    if(conflict){
+      warning = `<div class="empty-note" style="margin-top:10px;color:var(--danger);background:var(--danger-light);">⚠️ 這個時間跟公休／已有的預約／行程時間有衝突，仍可送出，但請確認托比排得過來。</div>`;
+    }
+  }
+  return `
+    <div class="slot-title">${newBookingState.date} 自訂開始時間</div>
+    <div class="field" style="margin-bottom:0;">
+      <input type="time" id="nb-manual-time" value="${nb.time||''}">
+    </div>
+    ${nb.time ? `<div class="info-line" style="padding-top:10px;"><span class="k">結束時間</span><span class="v">${fmtTime(toMin(nb.time)+duration)}</span></div>` : ''}
+    ${warning}
+  `;
+}
 function bindNewBooking(){
   if(!newBookingState.customer){
     document.getElementById('nb-field-select').addEventListener('change', e=>{ newBookingState.field = e.target.value; render(); });
@@ -742,19 +920,67 @@ function bindNewBooking(){
     });
     return;
   }
+  if(!newBookingState.selectedPet){
+    document.getElementById('nbChangeCustomer').addEventListener('click', ()=>{
+      newBookingState.customer = null; newBookingState.results = []; newBookingState.value = '';
+      render();
+    });
+    document.getElementById('nb-pet-select-grid').addEventListener('click', e=>{
+      const addCard = e.target.closest('#nb-pet-add-card');
+      if(addCard){ newBookingState.addPetOpen = !newBookingState.addPetOpen; render(); return; }
+      const card = e.target.closest('[data-pet-id]'); if(!card) return;
+      const pet = newBookingState.customer.pets.find(p=>p.id===card.dataset.petId);
+      if(pet){ newBookingState.selectedPet = pet; render(); }
+    });
+    if(newBookingState.addPetOpen){
+      document.getElementById('nbNpSubmitBtn').addEventListener('click', async ()=>{
+        const p = newBookingState.newPetDraft;
+        p.name = document.getElementById('nbnp-name').value.trim();
+        p.breed = document.getElementById('nbnp-breed').value.trim();
+        const errEl = document.getElementById('nbnp-err');
+        if(!p.name || !p.breed){ errEl.textContent='請填寫寵物名稱與品種。'; errEl.style.display='block'; return; }
+        if(!GOOGLE_SCRIPT_URL){ errEl.textContent='尚未連結試算表，無法新增。'; errEl.style.display='block'; return; }
+        errEl.style.display='none';
+        const btn = document.getElementById('nbNpSubmitBtn');
+        btn.disabled = true; btn.textContent = '新增中...';
+        try{
+          const res = await fetch(GOOGLE_SCRIPT_URL, {
+            method:'POST', headers:{ 'Content-Type':'text/plain;charset=utf-8' },
+            body: JSON.stringify({ action:'addPet', customerCode: newBookingState.customer.customerCode, petName:p.name, petBreed:p.breed })
+          });
+          const result = await res.json();
+          if(!result.success) throw new Error(result.error || '新增失敗');
+          newBookingState.customer.pets.push(result.pet);
+          newBookingState.selectedPet = result.pet;
+          newBookingState.addPetOpen = false;
+          newBookingState.newPetDraft = { name:'',breed:'',age:'',weight:'',personality:'',health:'',photo:null };
+          render();
+        }catch(err){
+          btn.disabled = false; btn.textContent = '新增這隻寵物並選擇';
+          errEl.textContent = '新增失敗，請確認網路連線後再試一次。';
+          errEl.style.display = 'block';
+          console.error('新增寵物失敗：', err);
+        }
+      });
+    }
+    return;
+  }
   document.getElementById('nbChangeCustomer').addEventListener('click', ()=>{
     newBookingState.customer = null; newBookingState.results = []; newBookingState.value = '';
-    newBookingState.date = null; newBookingState.time = null;
+    newBookingState.selectedPet = null; newBookingState.addPetOpen = false;
+    newBookingState.date = null; newBookingState.time = null; newBookingState.customTime = false; newBookingState.hideAreaHint = false;
     newBookingState.service = { category:'', animalType:'', hairLength:'', multiplier:1, duration:0, label:'' };
     nbTravelState.loaded = false; nbTravelState.blockedRanges = []; nbTravelState.forDate = null;
     render();
   });
+  const changePetBtn = document.getElementById('nbChangePet');
+  if(changePetBtn) changePetBtn.addEventListener('click', ()=>{ newBookingState.selectedPet = null; render(); });
   document.getElementById('nb-svc-grid').addEventListener('click', e=>{
     const c = e.target.closest('.svc-card'); if(!c) return;
     newBookingState.service.category = c.dataset.svc;
     newBookingState.service.animalType = ''; newBookingState.service.hairLength = ''; newBookingState.service.multiplier = 1;
     updateNBDuration();
-    newBookingState.date = null; newBookingState.time = null;
+    newBookingState.date = null; newBookingState.time = null; newBookingState.customTime = false; newBookingState.hideAreaHint = false;
     render();
   });
   const multiplierSelect = document.getElementById('nb-multiplier');
@@ -762,7 +988,7 @@ function bindNewBooking(){
     multiplierSelect.addEventListener('change', e=>{
       newBookingState.service.multiplier = parseInt(e.target.value, 10);
       updateNBDuration();
-      newBookingState.date = null; newBookingState.time = null;
+      newBookingState.date = null; newBookingState.time = null; newBookingState.customTime = false; newBookingState.hideAreaHint = false;
       render();
     });
   }
@@ -773,7 +999,7 @@ function bindNewBooking(){
       newBookingState.service.animalType = p.dataset.a;
       if(p.dataset.a==='cat') newBookingState.service.hairLength = '';
       updateNBDuration();
-      newBookingState.date = null; newBookingState.time = null;
+      newBookingState.date = null; newBookingState.time = null; newBookingState.customTime = false; newBookingState.hideAreaHint = false;
       render();
     });
   }
@@ -782,7 +1008,7 @@ function bindNewBooking(){
     hairRow.addEventListener('click', e=>{
       const p = e.target.closest('.choice-pill'); if(!p) return;
       newBookingState.service.hairLength = p.dataset.h; updateNBDuration();
-      newBookingState.date = null; newBookingState.time = null;
+      newBookingState.date = null; newBookingState.time = null; newBookingState.customTime = false; newBookingState.hideAreaHint = false;
       render();
     });
   }
@@ -813,6 +1039,27 @@ function bindNewBooking(){
       render();
     });
   }
+  const customTimeToggle = document.getElementById('nb-custom-time-toggle');
+  if(customTimeToggle){
+    customTimeToggle.addEventListener('change', ()=>{
+      newBookingState.customTime = customTimeToggle.checked;
+      newBookingState.time = null;
+      render();
+    });
+  }
+  const manualTimeInput = document.getElementById('nb-manual-time');
+  if(manualTimeInput){
+    manualTimeInput.addEventListener('change', ()=>{
+      newBookingState.time = manualTimeInput.value || null;
+      render();
+    });
+  }
+  const hideAreaToggle = document.getElementById('nb-hide-area-toggle');
+  if(hideAreaToggle){
+    hideAreaToggle.addEventListener('change', ()=>{
+      newBookingState.hideAreaHint = hideAreaToggle.checked;
+    });
+  }
   const submitBtn = document.getElementById('nbSubmitBtn');
   if(submitBtn) submitBtn.addEventListener('click', submitNBBooking);
   if(newBookingState.date && nbTravelState.forDate !== newBookingState.date && !nbTravelState.loading){
@@ -828,7 +1075,7 @@ async function searchNBCustomer(){
   const btn = document.getElementById('nbSearchBtn');
   btn.disabled = true; btn.textContent = '查詢中...';
   try{
-    const res = await fetch(GOOGLE_SCRIPT_URL + '?action=searchDiaryCustomer&field=' + newBookingState.field + '&value=' + encodeURIComponent(value));
+    const res = await fetch(GOOGLE_SCRIPT_URL + '?action=searchDiaryCustomer&field=' + newBookingState.field + '&value=' + encodeURIComponent(value) + '&adminPassword=' + encodeURIComponent(adminAuth.password));
     const data = await res.json();
     if(!data.success) throw new Error(data.error || '查詢失敗');
     const results = data.results || [];
@@ -846,6 +1093,8 @@ function selectNBCustomer(customer){
   newBookingState.customer = customer;
   newBookingState.results = [];
   newBookingState.error = '';
+  const pets = customer.pets || [];
+  newBookingState.selectedPet = pets.length===1 ? pets[0] : null;
   render();
 }
 function genBookingCode(){
@@ -858,13 +1107,13 @@ async function submitNBBooking(){
   const errEl = document.getElementById('nb-err2');
   errEl.style.display = 'none';
   if(!newBookingState.date || !newBookingState.time) return;
-  const c = newBookingState.customer, s = newBookingState.service, nb = newBookingState;
+  const c = newBookingState.customer, s = newBookingState.service, nb = newBookingState, p = nb.selectedPet || {};
   const code = genBookingCode();
   const payload = {
-    action:'booking', createdByAdmin:true, customerCode: c.customerCode,
+    action:'booking', createdByAdmin:true, adminPassword: adminAuth.password, customerCode: c.customerCode, hideAreaHint: nb.hideAreaHint,
     confirmCode: code, ownerName:c.ownerName, phone:c.phone, lineId:c.lineId, address:c.address,
-    petName:c.petName, petBreed:c.petBreed, petAge:c.petAge, petWeight:c.petWeight,
-    petPersonality:c.petPersonality, petHealth:c.petHealth,
+    petName:p.name, petBreed:p.breed, petAge:p.age, petWeight:p.weight,
+    petPersonality:p.personality, petHealth:p.health,
     serviceLabel:s.label, durationMinutes:s.duration,
     date: nb.date, time: nb.time, endTime: fmtTime(toMin(nb.time) + s.duration),
     taichung: adminConfig.taichungDates.has(nb.date)
@@ -878,8 +1127,9 @@ async function submitNBBooking(){
     const result = await res.json();
     if(!result.success) throw new Error(result.error || '新增失敗');
     newBookingState.customer = null; newBookingState.results = []; newBookingState.value = '';
+    newBookingState.selectedPet = null; newBookingState.addPetOpen = false;
     newBookingState.service = { category:'', animalType:'', hairLength:'', multiplier:1, duration:0, label:'' };
-    newBookingState.date = null; newBookingState.time = null;
+    newBookingState.date = null; newBookingState.time = null; newBookingState.customTime = false; newBookingState.hideAreaHint = false;
     render();
   }catch(err){
     btn.disabled = false; btn.textContent = '新增預約';
@@ -906,7 +1156,7 @@ function tplAdmin(){
       <span><i class="dot e"></i>延長營業至20:00</span>
       <span><i class="dot c"></i>整天不可預約</span>
       <span><i class="dot d"></i>已過去</span>
-      <span><span class="cal-tag" style="position:static;">台中</span>台中服務日</span>
+      <span><span class="taichung-dot"></span>台中服務日</span>
     </div>
 
     <div id="admin-detail">${renderAdminDetail()}</div>
@@ -940,7 +1190,7 @@ function renderAdminCalGrid(){
     else{ cls += ' avail'; if(extended) cls += ' extended'; }
     if(isToday) cls += ' today';
     if(isSelected) cls += ' selected';
-    const tag = taichung ? `<span class="cal-tag">台中</span>` : '';
+    const tag = taichung ? `<span class="taichung-dot"></span>` : '';
     html += `<div class="${cls}" data-date="${past?'':dateStr}"><span>${d}</span>${tag}</div>`;
   }
   return html;
@@ -969,6 +1219,31 @@ function renderAdminDetail(){
     </div>
     `;
     const end = getBusinessEnd(date);
+    if(taichung){
+      const regionData = adminConfig.taichungRegionSlots[date] || { taichung: new Set(), shuangbei: new Set() };
+      const tcSet = regionData.taichung || new Set();
+      const sbSet = regionData.shuangbei || new Set();
+      html += `
+      <div class="slot-title">台中／雙北可預約時段</div>
+      <div class="region-legend">
+        <span><i class="region-dot tc"></i>台中客人可約</span>
+        <span><i class="region-dot sb"></i>雙北客人可約</span>
+      </div>
+      <div class="empty-note" style="margin-bottom:14px;">在下面各拖曳圈選一段連續時間（點一下再拖到結尾放開即可）；地址判斷不是台中、也不是雙北的客人，這天將完全無法預約任何時段。</div>
+      <div class="field"><label>台中客人可預約時段</label>
+        <div class="admin-slot-grid region-grid" id="admin-region-grid-taichung" data-region="taichung">
+          ${baseSlots(end).map(t=>{ const val=fmtTime(t); return `<div class="admin-slot region-cell ${tcSet.has(val)?'region-on-tc':''}" data-time="${val}">${val}</div>`; }).join('')}
+        </div>
+        <button type="button" class="link-btn" data-clear-region="taichung">清除台中時段</button>
+      </div>
+      <div class="field"><label>雙北客人可預約時段</label>
+        <div class="admin-slot-grid region-grid" id="admin-region-grid-shuangbei" data-region="shuangbei">
+          ${baseSlots(end).map(t=>{ const val=fmtTime(t); return `<div class="admin-slot region-cell ${sbSet.has(val)?'region-on-sb':''}" data-time="${val}">${val}</div>`; }).join('')}
+        </div>
+        <button type="button" class="link-btn" data-clear-region="shuangbei">清除雙北時段</button>
+      </div>
+      `;
+    }
     const blocked = adminConfig.blockedSlots[date] || new Set();
     html += `<div class="slot-title">個別時段設定（點選切換，共 ${baseSlots(end).length} 個時段）</div>
       <div class="admin-slot-grid" id="admin-slot-grid">
@@ -1040,11 +1315,66 @@ function bindAdmin(){
   document.querySelectorAll('[data-remove-taichung]').forEach(btn=>{ btn.addEventListener('click', ()=>{ adminConfig.taichungDates.delete(btn.dataset.removeTaichung); render(); saveSettings(); }); });
   document.querySelectorAll('[data-remove-extended]').forEach(btn=>{ btn.addEventListener('click', ()=>{ adminConfig.extendedDates.delete(btn.dataset.removeExtended); render(); saveSettings(); }); });
   document.querySelectorAll('[data-remove-blocked]').forEach(btn=>{ btn.addEventListener('click', ()=>{ delete adminConfig.blockedSlots[btn.dataset.removeBlocked]; render(); saveSettings(); }); });
+
+  bindRegionDragGrid(document.getElementById('admin-region-grid-taichung'), 'taichung');
+  bindRegionDragGrid(document.getElementById('admin-region-grid-shuangbei'), 'shuangbei');
+  document.querySelectorAll('[data-clear-region]').forEach(btn=>{
+    btn.addEventListener('click', ()=>{
+      const date = adminView.selectedDate;
+      const region = btn.dataset.clearRegion;
+      if(!adminConfig.taichungRegionSlots[date]) adminConfig.taichungRegionSlots[date] = { taichung:new Set(), shuangbei:new Set() };
+      adminConfig.taichungRegionSlots[date][region] = new Set();
+      render(); saveSettings();
+    });
+  });
 }
 
-loadSettings();
+// 讓「台中可預約時段」「雙北可預約時段」這兩條時段列可以用拖曳圈選一段連續時間
+// 拖曳放開時，會把那段時間整段設成該地區可預約（取代掉這個地區原本選的那段）
+function bindRegionDragGrid(gridEl, region){
+  if(!gridEl) return;
+  const cells = Array.from(gridEl.querySelectorAll('.region-cell'));
+  let dragging = false, startIdx = null;
+  function idxFromPoint(x, y){
+    const el = document.elementFromPoint(x, y);
+    const cell = el && el.closest ? el.closest('.region-cell') : null;
+    return (cell && cells.includes(cell)) ? cells.indexOf(cell) : null;
+  }
+  function previewRange(a, b){
+    const lo = Math.min(a,b), hi = Math.max(a,b);
+    cells.forEach((c,i)=>{ c.classList.toggle('dragging', i>=lo && i<=hi); });
+  }
+  function commitRange(a, b){
+    const lo = Math.min(a,b), hi = Math.max(a,b);
+    const date = adminView.selectedDate;
+    if(!adminConfig.taichungRegionSlots[date]) adminConfig.taichungRegionSlots[date] = { taichung:new Set(), shuangbei:new Set() };
+    const times = cells.slice(lo, hi+1).map(c=>c.dataset.time);
+    adminConfig.taichungRegionSlots[date][region] = new Set(times);
+    render(); saveSettings();
+  }
+  gridEl.addEventListener('pointerdown', e=>{
+    const cell = e.target.closest('.region-cell'); if(!cell) return;
+    dragging = true;
+    startIdx = cells.indexOf(cell);
+    previewRange(startIdx, startIdx);
+    e.preventDefault();
+  });
+  gridEl.addEventListener('pointermove', e=>{
+    if(!dragging) return;
+    const idx = idxFromPoint(e.clientX, e.clientY);
+    if(idx != null) previewRange(startIdx, idx);
+    e.preventDefault();
+  });
+  window.addEventListener('pointerup', e=>{
+    if(!dragging) return;
+    dragging = false;
+    const idx = idxFromPoint(e.clientX, e.clientY);
+    const endIdx = (idx == null) ? startIdx : idx;
+    commitRange(startIdx, endIdx);
+  });
+}
 
-if('serviceWorker' in navigator){
+initAdminAuth();if('serviceWorker' in navigator){
   window.addEventListener('load', ()=>{ navigator.serviceWorker.register('sw.js').catch(()=>{}); });
 }
 
